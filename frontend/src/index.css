@@ -1,0 +1,100 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+@import "leaflet/dist/leaflet.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --raised: #eef2f6;
+  --ink: #0f1b2d;
+  --muted: #586579;
+  --line: #d9e0e8;
+  --brand: #12305a;
+  --brand-ink: #ffffff;
+  --accent: #b45309;
+  --accent-soft: #fdf1dc;
+  --ok: #15803d;
+  --danger: #b91c1c;
+  --info: #1d4ed8;
+  --c-excess: #d97706;
+  --c-insufficient: #4f46e5;
+  --c-broken: #dc2626;
+  --c-adequate: #16a34a;
+  --c-investigate: #64748b;
+  color-scheme: light;
+}
+.dark {
+  --bg: #0b1320;
+  --surface: #111c2e;
+  --raised: #17243a;
+  --ink: #e6ecf4;
+  --muted: #93a1b5;
+  --line: #24344d;
+  --brand: #f5a524;
+  --brand-ink: #0b1320;
+  --accent: #f5a524;
+  --accent-soft: #2a2414;
+  --ok: #4ade80;
+  --danger: #f87171;
+  --info: #7aa7ff;
+  --c-excess: #f5a524;
+  --c-insufficient: #818cf8;
+  --c-broken: #f87171;
+  --c-adequate: #4ade80;
+  --c-investigate: #94a3b8;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok: var(--ok);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-night: #0b1320;
+  --color-night-2: #111c2e;
+  --color-glow: #f5a524;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { letter-spacing: -0.015em; text-wrap: balance; }
+.tabular { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.skip-link { position: absolute; left: -9999px; }
+.skip-link:focus { left: 1rem; top: 1rem; z-index: 1000; background: var(--surface); padding: .5rem .75rem; border-radius: .5rem; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .fade-in { animation: fade-in .35s ease both; }
+  @keyframes fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+
+/* Leaflet theming */
+.leaflet-container { font-family: var(--font-sans); background: var(--raised); border-radius: .75rem; z-index: 0; }
+.dark .leaflet-tile-pane { filter: brightness(.72) invert(1) contrast(.9) hue-rotate(190deg) saturate(.5); }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface); color: var(--ink); }
+.leaflet-popup-content { margin: 12px 14px; min-width: 240px; }
+.leaflet-bar a { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.leaflet-control-attribution { background: color-mix(in srgb, var(--surface) 85%, transparent) !important; color: var(--muted); }
+.leaflet-control-attribution a { color: var(--info); }
+.drl-marker { background: transparent; border: 0; }
+.recharts-text { fill: var(--muted); font-size: 12px; }
+.recharts-cartesian-grid line { stroke: var(--line); }
+.recharts-default-tooltip { background: var(--surface) !important; border-color: var(--line) !important; border-radius: 8px; }

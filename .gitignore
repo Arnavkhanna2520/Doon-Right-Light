@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+# Local data: database, uploaded photos (never commit)
+backend/data/
+*.db
+# Secrets
+.env
+.env.*
+!.env.example
+*-key.json
+# Node
+node_modules/
+frontend/dist/
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

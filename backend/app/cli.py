@@ -1,0 +1,55 @@
+"""Command-line helpers.
+
+  python -m app.cli create-admin EMAIL [--role admin|auditor|moderator]
+  python -m app.cli seed-demo
+  python -m app.cli purge-demo
+"""
+from __future__ import annotations
+
+import argparse
+import getpass
+import os
+import sys
+
+from fastapi import HTTPException
+from sqlalchemy import select
+
+from . import models as m
+from .db import SessionLocal
+from .security import hash_password, validate_password_strength
+from .seed import purge_demo, seed_demo
+
+
+def main() -> None:
+    p = argparse.ArgumentParser(prog="app.cli")
+    sub = p.add_subparsers(dest="cmd", required=True)
+    ca = sub.add_parser("create-admin", help="create a staff user (password is prompted, or read from DRL_NEW_PASSWORD)")
+    ca.add_argument("email")
+    ca.add_argument("--role", default="admin", choices=m.ROLES)
+    ca.add_argument("--name", default="")
+    sub.add_parser("seed-demo", help="load clearly-labelled synthetic demonstration data")
+    sub.add_parser("purge-demo", help="remove all demonstration data")
+    a = p.parse_args()
+    with SessionLocal() as db:
+        if a.cmd == "create-admin":
+            email = a.email.strip().lower()
+            if db.scalar(select(m.User.id).where(m.User.email == email)):
+                sys.exit(f"User {email} already exists.")
+            pw = os.environ.get("DRL_NEW_PASSWORD") or getpass.getpass("Password: ")
+            try:
+                validate_password_strength(pw)
+            except HTTPException as e:
+                sys.exit(e.detail)
+            db.add(m.User(email=email, full_name=a.name, role=a.role, password_hash=hash_password(pw)))
+            db.commit()
+            print(f"Created {a.role} {email}")
+        elif a.cmd == "seed-demo":
+            print(seed_demo(db))
+            db.commit()
+        elif a.cmd == "purge-demo":
+            print(purge_demo(db))
+            db.commit()
+
+
+if __name__ == "__main__":
+    main()
