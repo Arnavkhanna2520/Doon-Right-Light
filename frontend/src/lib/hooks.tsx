@@ -54,12 +54,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const saved = localStorage.getItem("drl-theme");
       if (saved === "light" || saved === "dark") return saved;
     } catch { /* storage unavailable */ }
-    return window.matchMedia?.("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    return "dark"; // the night theme is the default; visitors can switch and the choice is remembered
   });
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
+    const root = document.documentElement;
+    root.classList.add("theme-fade");
+    root.classList.toggle("dark", theme === "dark");
+    const t = setTimeout(() => root.classList.remove("theme-fade"), 450);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#0b0f29" : "#eff0f9");
     try { localStorage.setItem("drl-theme", theme); } catch { /* ignore */ }
+    return () => clearTimeout(t);
   }, [theme]);
 
   const reloadMeta = useCallback(() => { get<Meta>("/meta").then(setMeta).catch(() => setMeta(null)); }, []);

@@ -7,17 +7,17 @@ import { cx } from "./ui";
 export function Logo({ className = "size-8" }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" className={className} role="img" aria-label="Doon Right-Light logo">
-      <rect width="64" height="64" rx="14" fill="#0b1320" />
+      <rect width="64" height="64" rx="16" fill="#141a3d" />
       <path d="M14 20h36a4 4 0 0 1 4 4v2H10v-2a4 4 0 0 1 4-4z" fill="#e6ecf4" />
-      <path d="M16 28h32l8 26H8z" fill="#f5a524" opacity=".9" />
+      <path d="M16 28h32l8 26H8z" fill="#ffb347" opacity=".9" />
       <circle cx="32" cy="27" r="3" fill="#fff7e0" />
     </svg>
   );
 }
 
 const NAV: [string, string][] = [
-  ["/dashboard", "Dashboard"], ["/map", "Map"], ["/analysis", "Analysis"], ["/audit", "Lighting audit"],
-  ["/recommendations", "Recommendations"], ["/calculator", "Energy calculator"], ["/downloads", "Reports"],
+  ["/dashboard", "Dashboard"], ["/map", "Map"], ["/analysis", "Analysis"], ["/audit", "Audit"],
+  ["/recommendations", "Recommendations"], ["/calculator", "Calculator"], ["/downloads", "Reports"],
 ];
 
 export default function Layout() {
@@ -26,35 +26,39 @@ export default function Layout() {
   const loc = useLocation();
   useEffect(() => { setOpen(false); window.scrollTo(0, 0); }, [loc.pathname]);
   const link = ({ isActive }: { isActive: boolean }) =>
-    cx("rounded-md px-2.5 py-1.5 text-sm font-medium transition", isActive ? "bg-raised text-ink" : "text-muted hover:text-ink");
+    cx("whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition", isActive ? "bg-raised text-ink" : "text-muted hover:text-ink");
   const home = loc.pathname === "/";
   return (
     <div className="flex min-h-screen flex-col">
       <a href="#main" className="skip-link">Skip to content</a>
-      <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4">
-          <Link to="/" className="flex items-center gap-2 font-semibold"><Logo className="size-7" /><span>Doon Right-Light</span></Link>
+      <header className={cx("z-40 text-ink", home ? "dark absolute inset-x-0 top-0" : "sticky top-0 border-b border-line bg-bg/80 backdrop-blur-md")}>
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4">
+          <Link to="/" className="display flex shrink-0 items-center gap-2 whitespace-nowrap text-lg font-semibold"><Logo className="size-8" /><span>Doon Right-Light</span></Link>
           <nav aria-label="Main" className="ml-4 hidden items-center gap-0.5 xl:flex">
             {NAV.map(([to, label]) => <NavLink key={to} to={to} className={link}>{label}</NavLink>)}
           </nav>
           <div className="ml-auto flex items-center gap-1.5">
-            <Link to="/report" className="hidden rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-brand-ink hover:opacity-90 sm:block">Report an issue</Link>
-            <button onClick={toggleTheme} className="rounded-md p-2 text-muted hover:bg-raised hover:text-ink" aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`} title="Switch theme">
-              {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+            <Link to="/report" className="hidden whitespace-nowrap rounded-full bg-brand px-4 py-1.5 text-sm font-semibold text-brand-ink hover:brightness-110 sm:block">Report an issue</Link>
+            <button role="switch" aria-checked={theme === "dark"} onClick={toggleTheme} title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+              aria-label="Dark mode" className="relative flex h-8 w-[3.75rem] shrink-0 items-center justify-between rounded-full border border-line bg-raised px-2 text-muted">
+              <Sun className="size-3.5" aria-hidden /><Moon className="size-3.5" aria-hidden />
+              <span className={cx("absolute top-[3px] grid size-6 place-items-center rounded-full bg-brand text-brand-ink shadow transition-[left] duration-300", theme === "dark" ? "left-[calc(100%-1.65rem)]" : "left-[3px]")}>
+                {theme === "dark" ? <Moon className="size-3.5" aria-hidden /> : <Sun className="size-3.5" aria-hidden />}
+              </span>
             </button>
             {user ? (
               <>
                 {can(user, "moderator", "auditor") && <NavLink to="/admin" className={({ isActive }) => cx(link({ isActive }), "hidden sm:block")}>Admin</NavLink>}
-                <button onClick={() => logout()} className="hidden items-center gap-1 rounded-md px-2 py-1.5 text-sm text-muted hover:text-ink sm:flex" title={`Signed in as ${user.email}`}><LogOut className="size-4" aria-hidden />Sign out</button>
+                <button onClick={() => logout()} className="hidden items-center gap-1 rounded-md px-2 py-1.5 text-sm text-muted hover:text-ink sm:flex" title={`Signed in as ${user.email}`}><LogOut className="size-4" aria-hidden /><span className="whitespace-nowrap">Sign out</span></button>
               </>
-            ) : <NavLink to="/login" className={({ isActive }) => cx(link({ isActive }), "hidden sm:block")}>Staff sign in</NavLink>}
+            ) : <NavLink to="/login" className={({ isActive }) => cx(link({ isActive }), "hidden sm:block")}>Sign in</NavLink>}
             <button className="rounded-md p-2 text-muted hover:bg-raised xl:hidden" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-nav" aria-label="Menu">
               {open ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
           </div>
         </div>
         {open && (
-          <nav id="mobile-nav" aria-label="Mobile" className="grid gap-1 border-t border-line px-4 py-3 xl:hidden">
+          <nav id="mobile-nav" aria-label="Mobile" className="grid gap-1 border-t border-line bg-surface px-4 py-3 xl:hidden">
             {NAV.map(([to, label]) => <NavLink key={to} to={to} className={link}>{label}</NavLink>)}
             <NavLink to="/report" className={link}>Report an issue</NavLink>
             {user && can(user, "moderator", "auditor") && <NavLink to="/admin" className={link}>Admin</NavLink>}

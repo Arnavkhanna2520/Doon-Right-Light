@@ -1,54 +1,59 @@
 @import "tailwindcss";
 @import "@fontsource-variable/inter";
+@import "@fontsource-variable/bricolage-grotesque";
 @import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --bg: #f4f6f9;
+  --bg: #eff0f9;
   --surface: #ffffff;
-  --raised: #eef2f6;
-  --ink: #0f1b2d;
-  --muted: #586579;
-  --line: #d9e0e8;
-  --brand: #12305a;
+  --raised: #e6e8f5;
+  --ink: #141a3d;
+  --muted: #565f8a;
+  --line: #d3d7ec;
+  --brand: #27348b;
   --brand-ink: #ffffff;
-  --accent: #b45309;
-  --accent-soft: #fdf1dc;
-  --ok: #15803d;
-  --danger: #b91c1c;
-  --info: #1d4ed8;
-  --c-excess: #d97706;
-  --c-insufficient: #4f46e5;
-  --c-broken: #dc2626;
-  --c-adequate: #16a34a;
-  --c-investigate: #64748b;
+  --accent: #9a5600;
+  --accent-soft: #fbf0dc;
+  --ok: #1d7a55;
+  --danger: #b3261e;
+  --info: #2f49c9;
+  --c-excess: #c27100;
+  --c-insufficient: #4a55d6;
+  --c-broken: #cf3030;
+  --c-adequate: #1f8f63;
+  --c-investigate: #6a7399;
+  --page-glow: radial-gradient(90rem 40rem at 50% -10rem, #dfe3fb 0%, transparent 70%);
   color-scheme: light;
 }
+/* Night palette: an indigo sky, sodium-lamp amber and starlight, not black and neon. */
 .dark {
-  --bg: #0b1320;
-  --surface: #111c2e;
-  --raised: #17243a;
-  --ink: #e6ecf4;
-  --muted: #93a1b5;
-  --line: #24344d;
-  --brand: #f5a524;
-  --brand-ink: #0b1320;
-  --accent: #f5a524;
-  --accent-soft: #2a2414;
-  --ok: #4ade80;
-  --danger: #f87171;
-  --info: #7aa7ff;
-  --c-excess: #f5a524;
-  --c-insufficient: #818cf8;
-  --c-broken: #f87171;
-  --c-adequate: #4ade80;
-  --c-investigate: #94a3b8;
+  --bg: #0b0f29;
+  --surface: #141a3d;
+  --raised: #1c2450;
+  --ink: #eef1ff;
+  --muted: #a3abd0;
+  --line: #2b3568;
+  --brand: #ffb347;
+  --brand-ink: #1a1200;
+  --accent: #ffb347;
+  --accent-soft: #2e2a33;
+  --ok: #7fd1a8;
+  --danger: #ff8a8a;
+  --info: #9db4ff;
+  --c-excess: #ffb347;
+  --c-insufficient: #8f9bff;
+  --c-broken: #ff7b7b;
+  --c-adequate: #7fd1a8;
+  --c-investigate: #9aa3c7;
+  --page-glow: radial-gradient(90rem 36rem at 50% -12rem, #26307a 0%, transparent 70%);
   color-scheme: dark;
 }
 
 @theme inline {
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Inter Variable", ui-sans-serif, sans-serif;
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-raised: var(--raised);
@@ -62,20 +67,24 @@
   --color-ok: var(--ok);
   --color-danger: var(--danger);
   --color-info: var(--info);
-  --color-night: #0b1320;
-  --color-night-2: #111c2e;
-  --color-glow: #f5a524;
+  --color-night: #0b0f29;
+  --color-night-2: #141a3d;
+  --color-glow: #ffb347;
 }
 
 html { scroll-behavior: smooth; }
 body {
-  background: var(--bg);
+  background: var(--page-glow) no-repeat, var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
   font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
 }
-h1, h2, h3 { letter-spacing: -0.015em; text-wrap: balance; }
+h1, h2 { font-family: var(--font-display); letter-spacing: -0.02em; text-wrap: balance; }
+h3 { letter-spacing: -0.01em; }
+.display { font-family: var(--font-display); letter-spacing: -0.02em; }
+/* Colours ease when the theme is switched (a response to the user's action). */
+.theme-fade, .theme-fade * { transition: background-color .35s ease, border-color .35s ease, color .25s ease; }
 .tabular { font-variant-numeric: tabular-nums; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 .skip-link { position: absolute; left: -9999px; }
@@ -87,8 +96,13 @@ h1, h2, h3 { letter-spacing: -0.015em; text-wrap: balance; }
 }
 
 /* Leaflet theming */
-.leaflet-container { font-family: var(--font-sans); background: var(--raised); border-radius: .75rem; z-index: 0; }
-.dark .leaflet-tile-pane { filter: brightness(.72) invert(1) contrast(.9) hue-rotate(190deg) saturate(.5); }
+.leaflet-container { font-family: var(--font-sans); background: var(--raised); z-index: 0; }
+.leaflet-popup-content-wrapper { border-radius: 14px; border: 1px solid var(--line); box-shadow: 0 18px 50px rgb(5 8 30 / .35); }
+.leaflet-bar { border: 1px solid var(--line) !important; border-radius: 10px !important; overflow: hidden; box-shadow: none !important; }
+.leaflet-control-layers { background: var(--surface) !important; color: var(--ink); border: 1px solid var(--line) !important; border-radius: 10px !important; box-shadow: none !important; }
+.leaflet-control-layers-separator { border-color: var(--line) !important; }
+.drl-marker svg { transition: transform .15s ease; }
+.drl-marker:hover svg { transform: scale(1.35); }
 .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface); color: var(--ink); }
 .leaflet-popup-content { margin: 12px 14px; min-width: 240px; }
 .leaflet-bar a { background: var(--surface); color: var(--ink); border-color: var(--line); }
@@ -98,3 +112,8 @@ h1, h2, h3 { letter-spacing: -0.015em; text-wrap: balance; }
 .recharts-text { fill: var(--muted); font-size: 12px; }
 .recharts-cartesian-grid line { stroke: var(--line); }
 .recharts-default-tooltip { background: var(--surface) !important; border-color: var(--line) !important; border-radius: 8px; }
+
+/* Hero dimmer */
+.dimmer { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 999px; background: linear-gradient(90deg, #ffb347 var(--v), #2b3568 var(--v)); }
+.dimmer::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #fff7e6; border: 3px solid #ffb347; box-shadow: 0 0 22px #ffb34799; cursor: grab; }
+.dimmer::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: #fff7e6; border: 3px solid #ffb347; box-shadow: 0 0 22px #ffb34799; cursor: grab; }

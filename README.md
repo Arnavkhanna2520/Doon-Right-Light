@@ -12,9 +12,10 @@ The aim is not to remove streetlights. It is to light streets properly and stop 
 
 | Area | What it does |
 | --- | --- |
-| Home page | Explains the problem, the method and how to take part |
+| Home page | Interactive night-sky hero (drag to shield the streetlights and watch the stars return), then the problem, the method and how to take part |
+| Themes | Night (default) and light modes with a switch in the navigation bar; the choice is remembered |
 | Dashboard | KPI cards and charts (condition, zone comparison, monthly trend, priority, energy estimate, citizen reports), all driven by shared filters |
-| Interactive map | OpenStreetMap + Leaflet. Marker shape shows the lighting condition; hollow markers are demo data. Popups show measurement, fixture, verification and suggested action. Layer control, lux heatmap, legend, search, filters |
+| Interactive map | OpenStreetMap + Leaflet. Markers are drawn as points of light whose glow reflects the condition; a dotted outer ring marks demo data. Night, light and street basemaps. Popups show measurement, fixture, verification and suggested action. Layer control, lux heatmap, legend, search, filters |
 | Analysis | Lux distributions, road-type comparison, data-quality indicators, Getis-Ord Gi\* hotspots, and a plain statement of what satellite data can and cannot show |
 | Lighting audit | CSV upload with validation (missing values, duplicates, wrong types, inconsistent values), preview, cleaned-data download, import |
 | Citizen reporting | Public form with optional map pin and photo, report ID, status tracking, duplicate linking, spam protection |
@@ -144,7 +145,8 @@ Common header variants (`Lux Measurement`, `Date Time`, `Lighting Direction`…)
 | Source | Use | Status in this repository |
 | --- | --- | --- |
 | Ground lux surveys | The core evidence | You collect and upload them |
-| [OpenStreetMap](https://www.openstreetmap.org/copyright) | Base map tiles, © OpenStreetMap contributors | Active |
+| [OpenStreetMap](https://www.openstreetmap.org/copyright) | Map data, © OpenStreetMap contributors | Active |
+| [CARTO basemaps](https://carto.com/attributions) | Night and light map styles (the default), © CARTO | Active; check CARTO's terms before commercial or high-traffic use |
 | [NASA Black Marble VNP46A2](https://ladsweb.modaps.eosdis.nasa.gov/missions-and-measurements/products/VNP46A2/) | City-wide night-time radiance, about 500 m | **Not integrated by default** |
 | IS 1944 (BIS) | Source for thresholds | Not included; enter values yourself |
 

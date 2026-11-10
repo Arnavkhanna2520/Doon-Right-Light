@@ -8,7 +8,7 @@ export function Card({ children, className, title, hint, actions }: {
   children: ReactNode; className?: string; title?: string; hint?: string; actions?: ReactNode;
 }) {
   return (
-    <section className={cx("min-w-0 rounded-xl border border-line bg-surface p-5", className)}>
+    <section className={cx("min-w-0 rounded-2xl border border-line bg-surface p-5 sm:p-6", className)}>
       {(title || actions) && (
         <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
           <div>
@@ -27,7 +27,7 @@ export function PageHeader({ title, lead, actions }: { title: string; lead?: Rea
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div className="max-w-3xl">
-        <h1 className="text-2xl font-semibold sm:text-3xl">{title}</h1>
+        <h1 className="text-3xl font-semibold sm:text-4xl">{title}</h1>
         {lead && <p className="mt-2 text-muted">{lead}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
@@ -96,7 +96,7 @@ export function Badge({ children, tone = "neutral", title }: {
     info: "border-info/40 bg-info/10 text-info",
   }[tone];
   return (
-    <span title={title} className={cx("inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide", t)}>
+    <span title={title} className={cx("inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-xs font-medium", t)}>
       {children}
     </span>
   );
@@ -111,26 +111,31 @@ export function ProvenanceBadge({ origin, verification }: { origin: string; veri
   return <><Badge>{ORIGIN_LABEL[origin] ?? human(origin)}</Badge> <Badge tone="ok">{VERIFY_LABEL[verification]}</Badge></>;
 }
 
-export function ClassDot({ k, size = 12 }: { k: string; size?: number }) {
-  const m = CLASS_META[k] ?? CLASS_META.needs_investigation;
-  return <span aria-hidden dangerouslySetInnerHTML={{ __html: shapeSvg(m.shape, m.color, size, false) }} className="inline-block align-middle" />;
+export function ClassDot({ k, size = 16 }: { k: string; size?: number }) {
+  return <span aria-hidden dangerouslySetInnerHTML={{ __html: markerSvg(k, size, false) }} className="inline-block shrink-0 align-middle" />;
 }
 export function ClassLabel({ k }: { k: string }) {
   return <span className="inline-flex items-center gap-1.5"><ClassDot k={k} />{CLASS_META[k]?.label ?? human(k)}</span>;
 }
 
-/** Marker shapes differ by class so the map does not rely on colour alone. Demo markers are hollow. */
-export function shapeSvg(shape: string, color: string, size: number, hollow: boolean): string {
-  const fill = hollow ? "var(--surface)" : color;
-  const common = `fill="${fill}" stroke="${color}" stroke-width="${hollow ? 2.6 : 1.4}" stroke-linejoin="round"`;
+/**
+ * Markers are drawn as points of light, so the glyph itself says what was found:
+ * a wide halo for over-lighting, a tidy glow for adequate light, a faint ringed dot
+ * for a dim stretch, an unlit ring with a cross for a dead lamp, and a dashed ring
+ * where more measurement is needed. Demo records carry an extra dotted outer ring.
+ * Shape differs as well as colour, so the map does not rely on colour alone.
+ */
+export function markerSvg(cls: string, size: number, demo: boolean): string {
+  const c = (CLASS_META[cls] ?? CLASS_META.needs_investigation).color;
   const body = {
-    circle: `<circle cx="10" cy="10" r="7" ${common}/>`,
-    square: `<rect x="3.5" y="3.5" width="13" height="13" rx="2" ${common}/>`,
-    triangle: `<path d="M10 2.5 18 17H2z" ${common}/>`,
-    diamond: `<path d="M10 2 18 10 10 18 2 10z" ${common}/>`,
-    cross: `<circle cx="10" cy="10" r="8" ${common}/><path d="M6.5 6.5l7 7M13.5 6.5l-7 7" stroke="${hollow ? color : "#fff"}" stroke-width="2" stroke-linecap="round"/>`,
-  }[shape] ?? "";
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="${size}" height="${size}">${body}</svg>`;
+    potential_excessive: `<circle cx="12" cy="12" r="10.5" fill="${c}" opacity=".16"/><circle cx="12" cy="12" r="7" fill="${c}" opacity=".38"/><circle cx="12" cy="12" r="3.6" fill="${c}"/>`,
+    adequate: `<circle cx="12" cy="12" r="6.5" fill="${c}" opacity=".25"/><circle cx="12" cy="12" r="3.4" fill="${c}"/>`,
+    insufficient: `<circle cx="12" cy="12" r="6.2" fill="none" stroke="${c}" stroke-width="1.4" opacity=".75"/><circle cx="12" cy="12" r="2.4" fill="${c}"/>`,
+    non_functional: `<circle cx="12" cy="12" r="6.2" fill="var(--surface)" stroke="${c}" stroke-width="1.8"/><path d="M9.6 9.6l4.8 4.8M14.4 9.6l-4.8 4.8" stroke="${c}" stroke-width="1.8" stroke-linecap="round"/>`,
+    needs_investigation: `<circle cx="12" cy="12" r="6.2" fill="none" stroke="${c}" stroke-width="1.5" stroke-dasharray="2.6 2.2"/><circle cx="12" cy="12" r="1.6" fill="${c}"/>`,
+  }[cls] ?? "";
+  const ring = demo ? `<circle cx="12" cy="12" r="11" fill="none" stroke="var(--muted)" stroke-width=".9" stroke-dasharray="1 2.6" stroke-linecap="round" opacity=".55"/>` : "";
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}">${ring}${body}</svg>`;
 }
 
 export const Spinner = ({ label = "Loading" }: { label?: string }) => (

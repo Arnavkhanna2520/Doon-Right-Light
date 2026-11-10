@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Filters } from "../components/Filters";
@@ -7,11 +7,33 @@ import { EMPTY_FILTERS, type FilterState } from "../lib/api";
 import { CLASS_KEYS, CLASS_META, PRIORITY_COLOR, REPORT_CATEGORY, REPORT_STATUS, fmtNum, human } from "../lib/format";
 import { useApi, usePageMeta } from "../lib/hooks";
 
+/** Numbers roll to their new value when the data or filters change, so a change is noticed. */
+function useCountUp(target: number | undefined) {
+  const [shown, setShown] = useState(target ?? 0);
+  const from = useRef(0);
+  useEffect(() => {
+    if (target === undefined) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setShown(target); from.current = target; return; }
+    const start = performance.now(), a = from.current;
+    let raf = 0;
+    const tick = (t: number) => {
+      const k = Math.min(1, (t - start) / 500);
+      setShown(Math.round(a + (target - a) * (1 - (1 - k) ** 3)));
+      if (k < 1) raf = requestAnimationFrame(tick); else from.current = target;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(raf); from.current = target; };
+  }, [target]);
+  return target === undefined ? undefined : shown;
+}
+
 function Kpi({ label, value, color, hint }: { label: string; value: number | undefined; color?: string; hint?: string }) {
+  const shown = useCountUp(value);
   return (
-    <div className="rounded-xl border border-line bg-surface p-4" title={hint}>
+    <div className="relative overflow-hidden rounded-2xl border border-line bg-surface p-4" title={hint}>
+      <span aria-hidden className="absolute inset-x-0 top-0 h-1" style={{ background: color ?? "var(--line)" }} />
       <p className="text-xs font-medium text-muted">{label}</p>
-      <p className="tabular mt-1 text-3xl font-semibold" style={{ color }}>{fmtNum(value)}</p>
+      <p className="display tabular mt-2 text-4xl font-semibold" style={{ color }}>{fmtNum(shown)}</p>
     </div>
   );
 }

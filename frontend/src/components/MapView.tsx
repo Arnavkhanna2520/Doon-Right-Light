@@ -7,18 +7,25 @@ import { Link } from "react-router-dom";
 import { get, type Feature, type Rec } from "../lib/api";
 import { CLASS_META, REPORT_CATEGORY, REPORT_STATUS, fmtDate, human } from "../lib/format";
 import { useApp } from "../lib/hooks";
-import { Badge, ProvenanceBadge, shapeSvg } from "./ui";
+import { Badge, ProvenanceBadge, markerSvg } from "./ui";
 
 const MAX_MARKERS = 1500;
-const TILE = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-const ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+const OSM = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+const CARTO = `${OSM} &copy; <a href="https://carto.com/attributions">CARTO</a>`;
+// Quiet basemaps keep attention on the lighting data. The night style is the default in the dark theme.
+const BASEMAPS = {
+  night: { name: "Night", url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", attr: CARTO },
+  day: { name: "Light", url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", attr: CARTO },
+  streets: { name: "Street detail", url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", attr: OSM },
+};
+const TILE = BASEMAPS.streets.url;
+const ATTR = OSM;
 
 const iconCache = new Map<string, L.DivIcon>();
 function iconFor(cls: string, demo: boolean): L.DivIcon {
   const key = `${cls}|${demo}`;
   if (!iconCache.has(key)) {
-    const m = CLASS_META[cls] ?? CLASS_META.needs_investigation;
-    iconCache.set(key, L.divIcon({ className: "drl-marker", html: shapeSvg(m.shape, m.color, 20, demo), iconSize: [20, 20], iconAnchor: [10, 10], popupAnchor: [0, -8] }));
+    iconCache.set(key, L.divIcon({ className: "drl-marker", html: markerSvg(cls, 28, demo), iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -10] }));
   }
   return iconCache.get(key)!;
 }
@@ -88,7 +95,7 @@ export interface PublicReport { public_id: string; category: string; status: str
 export default function MapView({ features, reports = [], focus = null, height = "70vh" }: {
   features: Feature[]; reports?: PublicReport[]; focus?: [number, number] | null; height?: string;
 }) {
-  const { meta } = useApp();
+  const { meta, theme } = useApp();
   const shown = useMemo(() => features.slice(0, MAX_MARKERS), [features]);
   const heat = useMemo(() => {
     const lux = features.filter((f) => f.latest.lux !== null);
@@ -98,11 +105,15 @@ export default function MapView({ features, reports = [], focus = null, height =
   if (!meta) return null;
   const a = meta.study_area;
   return (
-    <div style={{ height }} className="relative overflow-hidden rounded-xl border border-line">
+    <div style={{ height }} className="relative overflow-hidden rounded-2xl border border-line">
       <MapContainer center={a.center} zoom={13} minZoom={10} maxZoom={18} scrollWheelZoom className="size-full" aria-label="Map of Dehradun lighting observations">
-        <TileLayer url={TILE} attribution={ATTR} />
         <FlyTo target={focus} />
-        <LayersControl position="topright" collapsed>
+        <LayersControl position="topright" collapsed key={theme}>
+          {(theme === "dark" ? ["night", "day", "streets"] as const : ["day", "night", "streets"] as const).map((k, i) => (
+            <LayersControl.BaseLayer key={k} checked={i === 0} name={`${BASEMAPS[k].name} basemap`}>
+              <TileLayer url={BASEMAPS[k].url} attribution={BASEMAPS[k].attr} subdomains={k === "streets" ? "abc" : "abcd"} />
+            </LayersControl.BaseLayer>
+          ))}
           <LayersControl.Overlay checked name={`Lighting observations (${shown.length})`}>
             <LayerGroup>
               {shown.map((f) => (
@@ -133,17 +144,17 @@ export default function MapView({ features, reports = [], focus = null, height =
             </LayerGroup>
           </LayersControl.Overlay>
           <LayersControl.Overlay name="Approximate study area">
-            <Rectangle bounds={[[a.min_lat, a.min_lon], [a.max_lat, a.max_lon]]} pathOptions={{ color: "var(--accent)", weight: 1.5, fill: false, dashArray: "6 6" }} />
+            <Rectangle bounds={[[a.min_lat, a.min_lon], [a.max_lat, a.max_lon]]} pathOptions={{ color: "#ffb347", weight: 1.5, fill: false, dashArray: "6 6" }} />
           </LayersControl.Overlay>
         </LayersControl>
       </MapContainer>
-      <div className="pointer-events-none absolute bottom-6 left-3 z-[400] max-w-[15rem] rounded-lg border border-line bg-surface/95 p-3 text-xs shadow-sm" aria-label="Map legend">
+      <div className="pointer-events-none absolute bottom-6 left-3 z-[400] max-w-[15rem] rounded-xl border border-line bg-surface/90 p-3 text-xs backdrop-blur" aria-label="Map legend">
         <p className="mb-1.5 font-semibold">Legend</p>
         <ul className="space-y-1">
           {Object.entries(CLASS_META).map(([k, m]) => (
-            <li key={k} className="flex items-center gap-2"><span dangerouslySetInnerHTML={{ __html: shapeSvg(m.shape, m.color, 14, false) }} />{m.label}</li>
+            <li key={k} className="flex items-center gap-2"><span dangerouslySetInnerHTML={{ __html: markerSvg(k, 18, false) }} />{m.label}</li>
           ))}
-          <li className="flex items-center gap-2"><span dangerouslySetInnerHTML={{ __html: shapeSvg("circle", "var(--muted)", 14, true) }} />Hollow marker = demo data</li>
+          <li className="flex items-center gap-2"><span dangerouslySetInnerHTML={{ __html: markerSvg("adequate", 18, true) }} />Dotted outer ring = demo data</li>
           <li className="flex items-center gap-2"><span dangerouslySetInnerHTML={{ __html: `<svg viewBox="0 0 20 20" width="14" height="14"><path d="M10 1.5c-3.6 0-6.5 2.6-6.5 6.2 0 4.4 6.5 10.8 6.5 10.8s6.5-6.4 6.5-10.8c0-3.6-2.9-6.2-6.5-6.2z" fill="var(--info)"/></svg>` }} />Reviewed citizen report</li>
         </ul>
         {features.length > MAX_MARKERS && <p className="mt-2 text-muted">Showing the first {MAX_MARKERS} of {features.length} locations. Narrow the filters to see the rest.</p>}

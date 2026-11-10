@@ -16,7 +16,7 @@ export default function MapPage() {
   const items = data?.items ?? [];
   return (
     <>
-      <PageHeader title="Interactive map of Dehradun" lead="Click a marker for its measurement, fixture details, verification status and suggested action. Marker shape shows the lighting condition; hollow markers are demo data." />
+      <PageHeader title="Interactive map of Dehradun" lead="Click a marker for its measurement, fixture details, verification status and suggested action. Each marker is drawn as a point of light: the wider the glow, the brighter the reading. A dotted outer ring marks demo data." />
       <Filters value={filters} onChange={setFilters} search />
       <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_20rem]">
         <div>
