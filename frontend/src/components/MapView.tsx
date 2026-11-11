@@ -11,11 +11,11 @@ import { Badge, ProvenanceBadge, markerSvg } from "./ui";
 
 const MAX_MARKERS = 1500;
 const OSM = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-const CARTO = `${OSM} &copy; <a href="https://carto.com/attributions">CARTO</a>`;
-// Quiet basemaps keep attention on the lighting data. The night style is the default in the dark theme.
+// CARTO basemaps now require an API key, so the map uses OpenStreetMap tiles (free, no key).
+// The dark theme darkens the same tiles with a CSS filter (see .dark .leaflet-tile-pane in index.css).
 const BASEMAPS = {
-  night: { name: "Night", url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", attr: CARTO },
-  day: { name: "Light", url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", attr: CARTO },
+  night: { name: "Night", url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", attr: OSM },
+  day: { name: "Light", url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", attr: OSM },
   streets: { name: "Street detail", url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", attr: OSM },
 };
 const TILE = BASEMAPS.streets.url;
@@ -112,7 +112,7 @@ export default function MapView({ features, reports = [], focus = null, height =
         <LayersControl position="topright" collapsed key={theme}>
           {(theme === "dark" ? ["night", "day", "streets"] as const : ["day", "night", "streets"] as const).map((k, i) => (
             <LayersControl.BaseLayer key={k} checked={i === 0} name={`${BASEMAPS[k].name} basemap`}>
-              <TileLayer url={BASEMAPS[k].url} attribution={BASEMAPS[k].attr} subdomains={k === "streets" ? "abc" : "abcd"} />
+              <TileLayer url={BASEMAPS[k].url} attribution={BASEMAPS[k].attr} subdomains="abc" />
             </LayersControl.BaseLayer>
           ))}
           <LayersControl.Overlay checked name={`Lighting observations (${shown.length})`}>

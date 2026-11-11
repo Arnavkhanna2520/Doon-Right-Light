@@ -97,6 +97,8 @@ h3 { letter-spacing: -0.01em; }
 
 /* Leaflet theming */
 .leaflet-container { font-family: var(--font-sans); background: var(--raised); z-index: 0; }
+/* Dark theme: darken the OpenStreetMap tiles so the map stays quiet behind the lights. */
+.dark .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.8) contrast(0.95) saturate(0.6); }
 .leaflet-popup-content-wrapper { border-radius: 14px; border: 1px solid var(--line); box-shadow: 0 18px 50px rgb(5 8 30 / .35); }
 .leaflet-bar { border: 1px solid var(--line) !important; border-radius: 10px !important; overflow: hidden; box-shadow: none !important; }
 .leaflet-control-layers { background: var(--surface) !important; color: var(--ink); border: 1px solid var(--line) !important; border-radius: 10px !important; box-shadow: none !important; }
