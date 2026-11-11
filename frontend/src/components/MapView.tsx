@@ -11,8 +11,8 @@ import { Badge, ProvenanceBadge, markerSvg } from "./ui";
 
 const MAX_MARKERS = 1500;
 const OSM = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-// CARTO basemaps now require an API key, so the map uses OpenStreetMap tiles (free, no key).
-// The dark theme darkens the same tiles with a CSS filter (see .dark .leaflet-tile-pane in index.css).
+// Standard OpenStreetMap street maps: free, no API key, and they look like a normal map in both themes.
+// (Google Maps tiles need a paid Google API key and Google's terms do not allow them in Leaflet.)
 const BASEMAPS = {
   night: { name: "Night", url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", attr: OSM },
   day: { name: "Light", url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", attr: OSM },
