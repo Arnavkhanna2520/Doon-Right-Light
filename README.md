@@ -53,6 +53,10 @@ backend/tests/         44 automated tests
 
 ## Run it locally
 
+**Windows, one click:** download [`run-on-windows.bat`](run-on-windows.bat), put it in any folder and double-click it. It downloads or updates the project, installs dependencies, creates your admin account on first run, loads demo data and opens `http://localhost:8000`. (Needs Git, Python and Node.js installed.)
+
+**Manual steps:**
+
 Requirements: Python 3.11+ and Node.js 20+.
 
 ```bash

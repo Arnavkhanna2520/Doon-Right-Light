@@ -1,7 +1,7 @@
 """Command-line helpers.
 
   python -m app.cli create-admin EMAIL [--role admin|auditor|moderator]
-  python -m app.cli seed-demo
+  python -m app.cli seed-demo [--if-present]
   python -m app.cli purge-demo
 """
 from __future__ import annotations
@@ -27,7 +27,8 @@ def main() -> None:
     ca.add_argument("email")
     ca.add_argument("--role", default="admin", choices=m.ROLES)
     ca.add_argument("--name", default="")
-    sub.add_parser("seed-demo", help="load clearly-labelled synthetic demonstration data")
+    sd = sub.add_parser("seed-demo", help="load clearly-labelled synthetic demonstration data")
+    sd.add_argument("--if-present", action="store_true", help="only refresh demo data that is already loaded")
     sub.add_parser("purge-demo", help="remove all demonstration data")
     a = p.parse_args()
     with SessionLocal() as db:
@@ -44,6 +45,9 @@ def main() -> None:
             db.commit()
             print(f"Created {a.role} {email}")
         elif a.cmd == "seed-demo":
+            if a.if_present and not db.scalar(select(m.Location.id).where(m.Location.data_origin == "demo")):
+                print("No demo data loaded; nothing to refresh.")
+                return
             print(seed_demo(db))
             db.commit()
         elif a.cmd == "purge-demo":
