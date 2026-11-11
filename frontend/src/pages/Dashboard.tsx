@@ -37,6 +37,33 @@ function Kpi({ label, value, color, hint }: { label: string; value: number | und
     </div>
   );
 }
+/** The page in one sentence and one bar: how the checked places split between too bright, right, too dim and broken. */
+function LightBalance({ k }: { k: any }) {
+  const parts = [
+    { key: "potential_excessive", n: k.potential_excessive, words: "too bright", verb: true },
+    { key: "adequate", n: k.adequate, words: "lit about right", verb: true },
+    { key: "insufficient", n: k.insufficient, words: "too dim", verb: true },
+    { key: "non_functional", n: k.non_functional, words: "not working", verb: true },
+    { key: "needs_investigation", n: k.needs_investigation, words: k.needs_investigation === 1 ? "needs more checking" : "need more checking", verb: false },
+  ].filter((p) => p.n > 0);
+  const total = k.monitored_locations;
+  return (
+    <section aria-label="Light balance" className="rounded-2xl border border-line bg-surface p-5 sm:p-6">
+      <p className="display text-xl font-semibold leading-snug sm:text-2xl">
+        Of {fmtNum(total)} places checked, {parts.map((p, i) => (
+          <span key={p.key}>{i > 0 && (i === parts.length - 1 ? " and " : ", ")}<span style={{ color: CLASS_META[p.key].color }}>{fmtNum(p.n)} {p.verb ? (p.n === 1 ? "is " : "are ") : ""}{p.words}</span></span>
+        ))}.
+      </p>
+      <div className="mt-4 flex h-4 gap-0.5 overflow-hidden rounded-full" role="img" aria-label={parts.map((p) => `${p.n} ${p.words}`).join(", ")}>
+        {parts.map((p) => <span key={p.key} title={`${p.n} ${p.words}`} style={{ width: `${(p.n / total) * 100}%`, background: CLASS_META[p.key].color }} />)}
+      </div>
+      <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted">
+        {parts.map((p) => <li key={p.key} className="flex items-center gap-1.5"><span className="size-2.5 rounded-full" style={{ background: CLASS_META[p.key].color }} />{CLASS_META[p.key].short} {Math.round((p.n / total) * 100)}%</li>)}
+      </ul>
+    </section>
+  );
+}
+
 const H = 260;
 
 export default function Dashboard() {
@@ -51,7 +78,7 @@ export default function Dashboard() {
   }));
   return (
     <>
-      <PageHeader title="Monitoring dashboard" lead="Every figure is counted from the latest observation at each surveyed location, within the filters you choose." />
+      <PageHeader help="dashboard" title="Monitoring dashboard" lead="Every figure is counted from the latest observation at each surveyed location, within the filters you choose." />
       <Filters value={filters} onChange={setFilters} />
       <div className="mt-6 space-y-6">
         {error && <ErrorBox message={error} retry={reload} />}
@@ -61,7 +88,8 @@ export default function Dashboard() {
         )}
         {data && (
           <>
-            {k.demo_locations > 0 && <Note tone="warn"><strong>{fmtNum(k.demo_locations)} of {fmtNum(k.monitored_locations)} locations below are demo data.</strong> They are synthetic and say nothing about real lighting in Dehradun. Use the Data source filter to exclude them.</Note>}
+            {k.demo_locations > 0 && <Note tone="warn"><strong>{fmtNum(k.demo_locations)} of {fmtNum(k.monitored_locations)} locations below are demo data.</strong> The areas are real, the numbers are invented examples. Use the Data source filter to hide them.</Note>}
+            {k.monitored_locations > 0 && <LightBalance k={k} />}
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
               <Kpi label="Monitored locations" value={k.monitored_locations} />
               <Kpi label="Potential hotspots" value={k.potential_excessive + k.insufficient + k.non_functional} hint="Locations classified as excessive, insufficient or non-functional" />
@@ -82,8 +110,8 @@ export default function Dashboard() {
                   </BarChart>
                 </ResponsiveContainer>
               </Card>
-              <Card title="Region-wise comparison" hint="Classification mix per zone">
-                {data.by_zone.length === 0 ? <Empty title="No zones recorded" /> : (
+              <Card title="Area-wise comparison" hint="Lighting condition in each area">
+                {data.by_zone.length === 0 ? <Empty title="No areas recorded" /> : (
                   <ResponsiveContainer width="100%" height={H}>
                     <BarChart data={data.by_zone} margin={{ left: -16 }}>
                       <CartesianGrid vertical={false} /><XAxis dataKey="zone" tickLine={false} /><YAxis allowDecimals={false} tickLine={false} axisLine={false} />

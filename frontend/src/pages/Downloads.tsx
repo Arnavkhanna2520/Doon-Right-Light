@@ -29,7 +29,7 @@ export default function Downloads() {
   ];
   return (
     <>
-      <PageHeader title="Reports and downloads" lead="Export what the platform holds as CSV for analysis or as a PDF report. Every export states its period, data sources, method and limitations." />
+      <PageHeader help="downloads" title="Reports and downloads" lead="Export what the platform holds as CSV for analysis or as a PDF report. Every export states its period, data sources, method and limitations." />
       {!authReady ? null : !staff ? (
         <div className="space-y-6">
           <SignInPrompt what="Data exports are limited to project staff, because they can contain unverified records and report text." roles="auditors, moderators and administrators" />

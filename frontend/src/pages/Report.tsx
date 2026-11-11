@@ -114,7 +114,7 @@ export default function Report() {
 
   return (
     <>
-      <PageHeader title="Report a lighting issue" lead="Tell us about a light that is too bright, badly aimed, shining into your home, or a road that is dark. No account is needed." />
+      <PageHeader help="report" title="Report a lighting issue" lead="Tell us about a light that is too bright, badly aimed, shining into your home, or a road that is dark. No account is needed." />
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <Card>
           <form onSubmit={submit} noValidate className="space-y-5">

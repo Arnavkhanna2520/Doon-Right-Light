@@ -17,7 +17,7 @@ export function Logo({ className = "size-8" }: { className?: string }) {
 
 const NAV: [string, string][] = [
   ["/dashboard", "Dashboard"], ["/map", "Map"], ["/analysis", "Analysis"], ["/audit", "Audit"],
-  ["/recommendations", "Recommendations"], ["/calculator", "Calculator"], ["/downloads", "Reports"],
+  ["/recommendations", "Recommendations"], ["/calculator", "Calculator"], ["/downloads", "Reports"], ["/guide", "Guide"],
 ];
 
 export default function Layout() {
@@ -71,7 +71,7 @@ export default function Layout() {
         <div className="border-b border-accent/40 bg-accent-soft text-sm" role="note">
           <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2">
             <FlaskConical className="size-4 shrink-0 text-accent" aria-hidden />
-            <p><strong className="text-accent">Demo data is loaded.</strong> Records marked DEMO are synthetic and are not measurements, fixtures or complaints from Dehradun.
+            <p><strong className="text-accent">Demo data is loaded.</strong> The areas are real places, but every number marked DEMO is an invented example, not a measurement or complaint from that area.
               {meta.has_real_data ? " Real records are labelled separately." : " No real observations have been imported yet."}</p>
           </div>
         </div>
@@ -85,7 +85,7 @@ export default function Layout() {
           </div>
           <div><h2 className="font-semibold">Platform</h2><ul className="mt-2 space-y-1.5 text-muted">
             <li><Link className="hover:text-ink" to="/dashboard">Dashboard</Link></li><li><Link className="hover:text-ink" to="/map">Interactive map</Link></li>
-            <li><Link className="hover:text-ink" to="/analysis">Analysis</Link></li><li><Link className="hover:text-ink" to="/report">Report an issue</Link></li></ul></div>
+            <li><Link className="hover:text-ink" to="/guide">How to use this site</Link></li><li><Link className="hover:text-ink" to="/report">Report an issue</Link></li></ul></div>
           <div><h2 className="font-semibold">About the data</h2><ul className="mt-2 space-y-1.5 text-muted">
             <li><Link className="hover:text-ink" to="/methodology">Methodology and limitations</Link></li>
             <li><Link className="hover:text-ink" to="/methodology#sources">Data sources</Link></li>

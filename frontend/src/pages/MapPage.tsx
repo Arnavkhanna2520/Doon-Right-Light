@@ -3,7 +3,7 @@ import { Filters } from "../components/Filters";
 import MapView, { type PublicReport } from "../components/MapView";
 import { ClassDot, ErrorBox, Note, PageHeader, ProvenanceBadge } from "../components/ui";
 import { EMPTY_FILTERS, type Feature, type FilterState } from "../lib/api";
-import { useApi, usePageMeta } from "../lib/hooks";
+import { useApi, useApp, usePageMeta } from "../lib/hooks";
 
 export default function MapPage() {
   usePageMeta("Interactive map", "Map of surveyed street lighting in Dehradun: over-lit, under-lit, non-functional and adequate locations with evidence.");
@@ -14,9 +14,27 @@ export default function MapPage() {
   const { data, error, loading, reload } = useApi<{ count: number; items: Feature[] }>("/locations", { ...debounced });
   const reports = useApi<{ items: PublicReport[] }>("/reports/public");
   const items = data?.items ?? [];
+  const { meta } = useApp();
+  const all = useApi<{ items: Feature[] }>("/locations");
+  // Centre of each area = average position of its locations (used to fly the map there).
+  const centres: Record<string, [number, number]> = {};
+  for (const z of meta?.zones ?? []) {
+    const pts = (all.data?.items ?? []).filter((f) => f.zone === z);
+    if (pts.length) centres[z] = [pts.reduce((a, f) => a + f.latitude, 0) / pts.length, pts.reduce((a, f) => a + f.longitude, 0) / pts.length];
+  }
+  const pickArea = (z: string) => { setFilters({ ...filters, zone: z }); if (z && centres[z]) setFocus(centres[z]); };
   return (
     <>
-      <PageHeader title="Interactive map of Dehradun" lead="Click a marker for its measurement, fixture details, verification status and suggested action. Each marker is drawn as a point of light: the wider the glow, the brighter the reading. A dotted outer ring marks demo data." />
+      <PageHeader help="map" title="Interactive map of Dehradun" lead="Click a marker for its measurement, fixture details, verification status and suggested action. Each marker is drawn as a point of light: the wider the glow, the brighter the reading. A dotted outer ring marks demo data." />
+      {(meta?.zones.length ?? 0) > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-2" role="group" aria-label="Jump to an area">
+          <span className="text-sm font-medium text-muted">Jump to</span>
+          {["", ...(meta?.zones ?? [])].map((z) => (
+            <button key={z || "all"} onClick={() => pickArea(z)} aria-pressed={filters.zone === z}
+              className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${filters.zone === z ? "border-transparent bg-brand text-brand-ink" : "border-line bg-surface hover:border-accent"}`}>{z || "All areas"}</button>
+          ))}
+        </div>
+      )}
       <Filters value={filters} onChange={setFilters} search />
       <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_20rem]">
         <div>
@@ -33,7 +51,7 @@ export default function MapPage() {
                   <li key={f.id}>
                     <button className="w-full px-4 py-2 text-left hover:bg-raised" onClick={() => setFocus([f.latitude, f.longitude])}>
                       <span className="flex items-center gap-2 font-medium"><ClassDot k={f.latest.classification} />{f.name}</span>
-                      <span className="mt-1 flex flex-wrap items-center gap-1 text-xs text-muted">{f.zone && <span>{f.zone} ·</span>}<ProvenanceBadge origin={f.latest.data_origin} verification={f.latest.verification_status} /></span>
+                      <span className="mt-1 flex flex-wrap items-center gap-1 text-xs text-muted">{f.zone && <span>{f.zone}</span>}<ProvenanceBadge origin={f.latest.data_origin} verification={f.latest.verification_status} /></span>
                     </button>
                   </li>
                 ))}

@@ -175,7 +175,7 @@ function AddLocation() {
         <div className="sm:col-span-2"><Field label="Location name" required><Input required minLength={2} maxLength={200} value={f.name} onChange={set("name")} /></Field></div>
         <Field label="Latitude" required><Input required type="number" step="any" min={-90} max={90} value={f.latitude} onChange={set("latitude")} placeholder="30.3165" /></Field>
         <Field label="Longitude" required><Input required type="number" step="any" min={-180} max={180} value={f.longitude} onChange={set("longitude")} placeholder="78.0322" /></Field>
-        <Field label="Zone"><Input maxLength={120} value={f.zone} onChange={set("zone")} /></Field>
+        <Field label="Area"><Input maxLength={120} value={f.zone} onChange={set("zone")} /></Field>
         <Field label="Road type"><Select value={f.road_type} onChange={set("road_type")} options={opt("road_types")} /></Field>
         <Field label="Lux"><Input type="number" step="any" min={0} value={f.lux} onChange={set("lux")} /></Field>
         <Field label="Fixture wattage (W)"><Input type="number" step="any" min={1} max={2000} value={f.fixture_wattage} onChange={set("fixture_wattage")} /></Field>
@@ -288,7 +288,7 @@ function DataTools() {
       {user?.role === "admin" && (
         <Card title="Demonstration data" hint="Synthetic records for showing how the platform works before real surveys exist.">
           {feedback}
-          <p className="mb-4 text-sm text-muted">Demo data consists of 96 synthetic points on a grid with generic names, 14 synthetic citizen reports and illustrative thresholds. Everything is labelled DEMO across the site and cannot be marked as verified. Loading it never overwrites real records or thresholds you entered. Status: <strong className="text-ink">{meta?.has_demo_data ? "loaded" : "not loaded"}</strong>.</p>
+          <p className="mb-4 text-sm text-muted">Demo data consists of 100 invented readings scattered around ten real Dehradun areas (Rajpur Road, Araghar, Clock Tower and others), 14 invented citizen reports and illustrative thresholds. The places are real; the values are not. Everything is labelled DEMO across the site and cannot be marked as verified. Loading it never overwrites real records or thresholds you entered. Status: <strong className="text-ink">{meta?.has_demo_data ? "loaded" : "not loaded"}</strong>.</p>
           <div className="flex flex-wrap gap-3">
             <Button busy={busy === "seed"} onClick={() => run("seed", () => send("POST", "/admin/demo-data"), "Demo data loaded.").then((ok) => ok && reloadMeta())}>{meta?.has_demo_data ? "Reload demo data" : "Load demo data"}</Button>
             <Button variant="danger" disabled={!meta?.has_demo_data} busy={busy === "purge"} onClick={() => { if (window.confirm("Remove all demo records, demo reports and demo thresholds?")) run("purge", () => send("DELETE", "/admin/demo-data"), "Demo data removed.").then((ok) => ok && reloadMeta()); }}>Remove demo data</Button>

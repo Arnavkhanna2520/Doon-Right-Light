@@ -53,7 +53,7 @@ function Heat({ points }: { points: [number, number, number][] }) {
 
 function FlyTo({ target }: { target: [number, number] | null }) {
   const map = useMap();
-  useEffect(() => { if (target) map.flyTo(target, 16, { duration: 0.6 }); }, [map, target]);
+  useEffect(() => { if (target) map.flyTo(target, 15, { duration: 0.6 }); }, [map, target]);
   return null;
 }
 
@@ -76,6 +76,7 @@ function LocationPopup({ f }: { f: Feature }) {
         <Row k="Lux">{o.lux === null ? "Not measured" : `${o.lux} lux`}</Row>
         <Row k="Fixture">{human(o.fixture_status)}{o.fixture_wattage ? `, ${o.fixture_wattage} W` : ""}</Row>
         <Row k="Shielding / direction">{human(o.shielding)} / {human(o.light_direction)}</Row>
+        {f.zone && <Row k="Area">{f.zone}</Row>}
         <Row k="Road type">{human(f.road_type)}</Row>
         {o.notes && <Row k="Reported issue / notes">{o.notes}</Row>}
       </dl>

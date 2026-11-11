@@ -156,12 +156,13 @@ def test_no_threshold_means_no_classification_guess(auditor, client):
 # ------------------------------------------------------------ demo integrity
 def test_demo_data_is_labelled_and_cannot_be_verified(admin, auditor, client, db):
     counts = admin.post("/api/admin/demo-data").json()
-    assert counts["locations"] == 96
+    assert counts["locations"] == 100
     meta = client.get("/api/meta").json()
     assert meta["has_demo_data"] and not meta["has_real_data"]
     feats = client.get("/api/locations").json()["items"]
-    assert len(feats) == 96 and all(f["latest"]["data_origin"] == "demo" for f in feats)
-    assert all(f["name"].startswith("Demo site") for f in feats)
+    assert len(feats) == 100 and all(f["latest"]["data_origin"] == "demo" for f in feats)
+    assert all("demo point" in f["name"] for f in feats)
+    assert {f["zone"] for f in feats} >= {"Rajpur Road", "Araghar", "Clock Tower"}
     assert all(t["basis"] == "demo_placeholder" for t in client.get("/api/thresholds").json()["items"])
     assert client.get("/api/locations?classification=verified_issue").json()["count"] == 0
     assert client.get("/api/locations?include_demo=false").json()["count"] == 0
@@ -171,7 +172,7 @@ def test_demo_data_is_labelled_and_cannot_be_verified(admin, auditor, client, db
     assert auditor.patch(f"/api/admin/observations/{oid}", json={"verification_status": "verified"}).status_code == 409
     hot = client.get("/api/analysis/hotspots?radius_m=1500").json()
     assert hot["status"] == "ok" and hot["contains_demo"] is True
-    assert admin.delete("/api/admin/demo-data").json()["locations_removed"] == 96
+    assert admin.delete("/api/admin/demo-data").json()["locations_removed"] == 100
     assert client.get("/api/locations").json()["count"] == 0
     assert client.get("/api/thresholds").json()["items"] == []
 
@@ -256,7 +257,7 @@ def test_exports(admin, moderator, client):
     r = moderator.get("/api/exports/observations.csv")
     assert r.status_code == 200 and "text/csv" in r.headers["content-type"]
     lines = r.text.splitlines()
-    assert "synthetic demonstration records" in lines[0] and len(lines) == 96 + 2
+    assert "synthetic demonstration records" in lines[0] and len(lines) == 100 + 2
     assert moderator.get("/api/exports/hotspots.csv?radius_m=1500").text.count("\n") > 90
     assert moderator.get("/api/exports/recommendations.csv").status_code == 200
     rep = moderator.get("/api/exports/citizen-reports.csv")

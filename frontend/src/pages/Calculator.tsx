@@ -51,7 +51,7 @@ export default function Calculator() {
   );
   return (
     <>
-      <PageHeader title="Energy savings calculator" lead="Compare current and proposed fixture wattage. Results update as you type and are estimates based only on the numbers you enter." />
+      <PageHeader help="calculator" title="Energy savings calculator" lead="Compare current and proposed fixture wattage. Results update as you type and are estimates based only on the numbers you enter." />
       <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
         <Card title="Your assumptions">
           <form className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => e.preventDefault()} noValidate>

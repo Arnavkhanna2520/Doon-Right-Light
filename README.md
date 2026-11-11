@@ -6,13 +6,14 @@ Doon Right-Light is a street lighting audit and light pollution monitoring platf
 
 The aim is not to remove streetlights. It is to light streets properly and stop paying for light that goes into the sky.
 
-> **Data honesty.** This repository contains **no real measurements of Dehradun**. The site works out of the box with clearly labelled synthetic demo data. It ships with **no lux limits**: thresholds must be entered by an administrator from a cited source. Satellite data is an optional integration that is **off** unless you configure it.
+> **Data honesty.** This repository contains **no real measurements of Dehradun**. The site works out of the box with clearly labelled demo data: the demo points sit around real Dehradun areas (Rajpur Road, Araghar, Clock Tower and others), but every value is invented. It ships with **no lux limits**: thresholds must be entered by an administrator from a cited source. Satellite data is an optional integration that is **off** unless you configure it.
 
 ## Features
 
 | Area | What it does |
 | --- | --- |
 | Home page | Interactive night-sky hero (drag to shield the streetlights and watch the stars return), then the problem, the method and how to take part |
+| Guide | A plain-language page explaining every page in three steps, linked from each page header |
 | Themes | Night (default) and light modes with a switch in the navigation bar; the choice is remembered |
 | Dashboard | KPI cards and charts (condition, zone comparison, monthly trend, priority, energy estimate, citizen reports), all driven by shared filters |
 | Interactive map | OpenStreetMap + Leaflet. Markers are drawn as points of light whose glow reflects the condition; a dotted outer ring marks demo data. Night, light and street basemaps. Popups show measurement, fixture, verification and suggested action. Layer control, lux heatmap, legend, search, filters |

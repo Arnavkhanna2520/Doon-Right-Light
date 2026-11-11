@@ -1,9 +1,13 @@
 """Synthetic demonstration data.
 
 Everything created here is flagged data_origin='demo' (or is_demo for reports)
-and is shown in the interface with a DEMO DATA label. Points sit on a jittered
-grid, have generic names ('Demo site D-014') and do NOT represent real
-measurements, real fixtures or real complaints in Dehradun.
+and is shown in the interface with a DEMO DATA label.
+
+Points are scattered around the approximate centres of real Dehradun
+localities so the map and area comparisons look the way they will with real
+surveys. The PLACES are real; every VALUE (lux, fixture, activity, complaint)
+is invented. Nothing here is a measurement, a fixture record or a complaint
+from that locality, and each record says so in its name and notes.
 """
 from __future__ import annotations
 
@@ -23,8 +27,16 @@ DEMO_THRESHOLDS = {  # invented purely so the demo can show every classification
 }
 ROAD_WEIGHTS = [("residential", 34), ("collector", 20), ("sub_arterial", 14), ("arterial", 12),
                 ("junction", 10), ("pedestrian", 6), ("other", 4)]
-LAT0, LAT1, LON0, LON1 = 30.285, 30.355, 77.985, 78.075
-ROWS, COLS = 8, 12
+# Approximate locality centres (looked up from a places search, Nov 2026; Rajpur Road is a mid-road estimate).
+AREAS = [
+    ("Rajpur Road", 30.3480, 78.0610), ("Araghar", 30.3069, 78.0499), ("Clock Tower", 30.3243, 78.0418),
+    ("Paltan Bazaar", 30.3201, 78.0352), ("ISBT", 30.2892, 77.9987), ("Prem Nagar", 30.3340, 77.9602),
+    ("Dalanwala", 30.3117, 78.0577), ("Ballupur", 30.3331, 78.0113), ("Sahastradhara Road", 30.3541, 78.0823),
+    ("Doon IT Park", 30.3616, 78.0825),
+]
+POINTS_PER_AREA = 10
+SPREAD = 0.0042  # about 450 m
+LAT0, LAT1, LON0, LON1 = 30.285, 30.36, 77.96, 78.085
 
 
 def purge_demo(db: Session) -> dict:
@@ -51,17 +63,15 @@ def seed_demo(db: Session, seed: int = 2520) -> dict:
     now = datetime.now().replace(minute=0, second=0, microsecond=0)
     roads = [r for r, w in ROAD_WEIGHTS for _ in range(w)]
     n_obs = 0
-    idx = 0
-    for row in range(ROWS):
-        for col in range(COLS):
-            idx += 1
-            lat = LAT0 + (row + 0.5 + rng.uniform(-0.35, 0.35)) * (LAT1 - LAT0) / ROWS
-            lon = LON0 + (col + 0.5 + rng.uniform(-0.35, 0.35)) * (LON1 - LON0) / COLS
-            zone = f"Demo Zone {'ABCDEF'[(row // 4) * 3 + col // 4]}"
+    for area, clat, clon in AREAS:
+        for idx in range(1, POINTS_PER_AREA + 1):
+            lat = clat + rng.uniform(-SPREAD, SPREAD)
+            lon = clon + rng.uniform(-SPREAD, SPREAD)
+            zone = area
             rt = rng.choice(roads)
             critical = rt == "junction" or rng.random() < 0.08
             loc = m.Location(
-                name=f"Demo site D-{idx:03d}", latitude=round(lat, 6), longitude=round(lon, 6), zone=zone,
+                name=f"{area} - demo point {idx:02d}", latitude=round(lat, 6), longitude=round(lon, 6), zone=zone,
                 road_type=rt, safety_critical=critical,
                 safety_context=("Demo junction" if rt == "junction" else "Demo crossing / bus stop") if critical else "",
                 data_origin="demo",
@@ -92,7 +102,7 @@ def seed_demo(db: Session, seed: int = 2520) -> dict:
                                                else ["downward", "downward", "sideways"]),
                     pedestrian_activity=rng.choice(["low", "medium", "high"]),
                     vehicle_activity=rng.choice(["low", "medium", "high"]),
-                    notes="Synthetic demonstration record. Not a real measurement.", data_origin="demo",
+                    notes="Invented demo value. Not a real measurement at this place.", data_origin="demo",
                     verification_status=rng.choices(["verified", "expert_verified", "unverified"], [50, 15, 35])[0],
                 )
                 classification.apply(o, rt, rules)
@@ -106,11 +116,12 @@ def seed_demo(db: Session, seed: int = 2520) -> dict:
             public_id=f"DRL-DEMO{i:04d}", category=rng.choice(m.REPORT_CATEGORIES),
             description="DEMO REPORT - synthetic example created to demonstrate the review workflow. "
                         "It does not describe a real complaint.",
-            location_text=f"Demo location {i}", latitude=round(rng.uniform(LAT0, LAT1), 5),
-            longitude=round(rng.uniform(LON0, LON1), 5), status=st, is_demo=True,
+            location_text=f"Demo report near {AREAS[i % len(AREAS)][0]}",
+            latitude=round(AREAS[i % len(AREAS)][1] + rng.uniform(-SPREAD, SPREAD), 5),
+            longitude=round(AREAS[i % len(AREAS)][2] + rng.uniform(-SPREAD, SPREAD), 5), status=st, is_demo=True,
             created_at=created, updated_at=created + timedelta(days=rng.randint(0, 6)),
         ))
     db.flush()
     db.expire_all()
     n_rec = recommendations.regenerate(db)
-    return {"locations": ROWS * COLS, "observations": n_obs, "reports": len(statuses), "recommendations": n_rec}
+    return {"locations": len(AREAS) * POINTS_PER_AREA, "observations": n_obs, "reports": len(statuses), "recommendations": n_rec}

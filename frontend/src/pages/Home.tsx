@@ -19,11 +19,11 @@ function HeroArt() {
       <path d="M150 300V150" stroke="#93a1b5" strokeWidth="5" strokeLinecap="round" />
       <circle cx="150" cy="140" r="64" fill="url(#spill)" /><path d="M86 140 150 20 214 140z" fill="url(#spill)" opacity=".5" />
       <circle cx="150" cy="140" r="11" fill="#ffe9b8" />
-      <text x="150" y="335" textAnchor="middle" fill="#93a1b5" fontSize="13" fontWeight="600">Unshielded: light escapes upward</text>
+      <text x="150" y="335" textAnchor="middle" fill="#93a1b5" fontSize="12" fontWeight="600">Light escapes upward</text>
       {/* shielded */}
       <path d="M350 300V150h-26" stroke="#93a1b5" strokeWidth="5" strokeLinecap="round" fill="none" />
       <path d="M304 148h40v8h-40z" fill="#e6ecf4" /><path d="M306 156h36l44 144H262z" fill="url(#cone)" />
-      <text x="350" y="335" textAnchor="middle" fill="#93a1b5" fontSize="13" fontWeight="600">Shielded: light lands on the road</text>
+      <text x="350" y="335" textAnchor="middle" fill="#93a1b5" fontSize="12" fontWeight="600">Light lands on the road</text>
     </svg>
   );
 }
@@ -47,6 +47,22 @@ export default function Home() {
       <NightSkyHero />
 
       <div className="mx-auto max-w-7xl space-y-20 px-4 py-16">
+        <section aria-labelledby="start">
+          <h2 id="start" className="text-3xl font-semibold sm:text-4xl">Where do you want to start?</h2>
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            {[{ who: "I live in Dehradun", text: "Tell us about a light that glares, shines into your home, or a road that is dark.", to: "/report", cta: "Report a lighting issue" },
+              { who: "I work for the city", text: "See which areas need attention first and what to do at each place.", to: "/recommendations", cta: "See the priority list" },
+              { who: "I am measuring streets", text: "Upload your lux-meter readings and let the site check and map them.", to: "/audit", cta: "Upload a survey" }].map((c) => (
+              <Link key={c.who} to={c.to} className="group flex flex-col rounded-3xl border border-line bg-surface p-7 transition hover:-translate-y-0.5 hover:border-accent">
+                <span className="display text-2xl font-semibold">{c.who}</span>
+                <span className="mt-2 flex-1 text-muted">{c.text}</span>
+                <span className="mt-5 self-start rounded-full bg-raised px-4 py-2 text-sm font-semibold group-hover:bg-brand group-hover:text-brand-ink">{c.cta}</span>
+              </Link>
+            ))}
+          </div>
+          <p className="mt-4 text-sm text-muted">New here? The <Link to="/guide" className="font-medium text-info underline">short guide</Link> explains every page in three steps.</p>
+        </section>
+
         <section className="grid items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
           <div>
             <h2 className="text-3xl font-semibold sm:text-4xl">What is light pollution?</h2>

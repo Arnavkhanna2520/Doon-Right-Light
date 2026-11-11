@@ -30,7 +30,7 @@ export default function Methodology() {
           <li><strong>Ground-measured observations</strong> – lux readings and fixture records collected on the street and uploaded by an auditor. Unverified until checked.</li>
           <li><strong>Satellite-derived observations</strong> – night-time radiance from NASA Black Marble. Used only for city-wide context. {meta?.satellite.configured ? "Configured in this deployment." : "Not integrated in this deployment, so no satellite values are shown anywhere."}</li>
           <li><strong>Citizen reports</strong> – submitted by the public. Leads to verify, never measurements. Hidden from the public map until reviewed.</li>
-          <li><strong>Synthetic demonstration data</strong> – invented records on a grid with generic names, used to show how the platform works. Labelled DEMO everywhere, drawn with a dotted outer ring, and impossible to mark as verified.</li>
+          <li><strong>Synthetic demonstration data</strong> – invented readings scattered around real Dehradun areas so the map looks as it will with real surveys. The places are real; every value is made up. Labelled DEMO everywhere, drawn with a dotted outer ring, and impossible to mark as verified.</li>
         </ul>
       </section>
 

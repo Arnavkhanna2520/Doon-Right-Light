@@ -45,7 +45,7 @@ export default function Recommendations() {
   const reset = (fn: (v: string) => void) => (e: { target: { value: string } }) => { fn(e.target.value); setPage(1); };
   return (
     <>
-      <PageHeader title="Recommendations" lead="Suggested actions for surveyed locations, ranked by priority. Each one shows the measurement and reasoning behind it. They are options for a qualified engineer to assess, not instructions." />
+      <PageHeader help="recommendations" title="Recommendations" lead="Suggested actions for surveyed locations, ranked by priority. Each one shows the measurement and reasoning behind it. They are options for a qualified engineer to assess, not instructions." />
       <div className="mb-5 grid gap-3 md:grid-cols-2">
         <Note><strong>How priority is scored.</strong> Priority = severity × exposure × confidence, from 0 to 100. Severity is how far the reading is from the configured range, exposure reflects recorded pedestrian and vehicle activity, and confidence is lower for unverified data.</Note>
         <Note tone="warn"><strong>Safety rule.</strong> The engine never suggests lowering light at a location flagged safety-critical, such as a junction, crossing, hospital or bus stop. It asks for an on-site safety assessment. Unverified readings only produce a request to re-measure.</Note>
@@ -57,7 +57,7 @@ export default function Recommendations() {
           <div className="grid gap-3 sm:grid-cols-3">
             <Field label="Priority"><Select value={level} onChange={reset(setLevel)} placeholder="Any priority" options={[["high", "High"], ["medium", "Medium"], ["low", "Low"]]} /></Field>
             <Field label="Action"><Select value={action} onChange={reset(setAction)} placeholder="Any action" options={Object.entries(meta?.enums.actions ?? {}) as [string, string][]} /></Field>
-            <Field label="Zone"><Select value={zone} onChange={reset(setZone)} placeholder="All zones" options={(meta?.zones ?? []).map((z) => [z, z])} /></Field>
+            <Field label="Area"><Select value={zone} onChange={reset(setZone)} placeholder="All areas" options={(meta?.zones ?? []).map((z) => [z, z])} /></Field>
           </div>
         </Card>
       )}

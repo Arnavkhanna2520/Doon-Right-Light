@@ -11,7 +11,7 @@ export function Filters({ value, onChange, search = false }: { value: FilterStat
   return (
     <form className="grid grid-cols-2 gap-3 rounded-xl border border-line bg-surface p-4 md:grid-cols-4 xl:grid-cols-8" onSubmit={(e) => e.preventDefault()} aria-label="Filters">
       {search && <div className="col-span-2"><Field label="Search location"><Input type="search" value={value.q} onChange={set("q")} placeholder="Name contains…" /></Field></div>}
-      <Field label="Location / zone"><Select value={value.zone} onChange={set("zone")} placeholder="All zones" options={(meta?.zones ?? []).map((z) => [z, z])} /></Field>
+      <Field label="Area"><Select value={value.zone} onChange={set("zone")} placeholder="All areas" options={(meta?.zones ?? []).map((z) => [z, z])} /></Field>
       <Field label="Lighting category">
         <Select value={value.classification} onChange={set("classification")} placeholder="All categories"
           options={[...Object.entries(CLASS_META).map(([k, v]) => [k, v.label] as [string, string]), ["verified_issue", "Verified lighting issues"]]} />

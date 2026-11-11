@@ -52,7 +52,7 @@ export default function Audit() {
 
   return (
     <>
-      <PageHeader title="Ground-level lighting audit" lead="Upload a lux-meter survey as CSV. The file is checked for missing values, duplicates, wrong data types and inconsistent entries before anything is imported."
+      <PageHeader help="audit" title="Ground-level lighting audit" lead="Upload a lux-meter survey as CSV. The file is checked for missing values, duplicates, wrong data types and inconsistent entries before anything is imported."
         actions={<Button variant="outline" onClick={() => dl("/datasets/template.csv")}><Download className="size-4" aria-hidden />CSV template</Button>} />
       <div className="grid gap-6 lg:grid-cols-[1.25fr_1fr]">
         <div className="space-y-6">

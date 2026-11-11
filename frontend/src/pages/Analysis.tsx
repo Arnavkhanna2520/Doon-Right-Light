@@ -44,7 +44,7 @@ export default function Analysis() {
   }
   return (
     <>
-      <PageHeader title="Light pollution analysis" lead="Ground lux distributions, clustering and data quality. Read the satellite note below before comparing anything here with night-time imagery." />
+      <PageHeader help="analysis" title="Light pollution analysis" lead="Ground lux distributions, clustering and data quality. Read the satellite note below before comparing anything here with night-time imagery." />
       <Filters value={filters} onChange={setFilters} />
       <div className="mt-6 space-y-6">
         <Card title="Satellite radiance versus ground-level light" hint="They measure different things and must not be read as the same quantity.">
@@ -119,7 +119,7 @@ export default function Analysis() {
                 {Object.entries(HOT).map(([k, v]) => <span key={k} className="inline-flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1 text-xs"><span className="size-2.5 rounded-full" style={{ background: v.color }} />{v.label}: <strong className="tabular">{counts[k] ?? 0}</strong></span>)}
               </div>
               {sig.length === 0 ? <Empty title="No statistically significant clusters at this distance band" /> : (
-                <Table head={["Location", "Zone", "Lux", "z-score", "Neighbours", "Result"]}>
+                <Table head={["Location", "Area", "Lux", "z-score", "Neighbours", "Result"]}>
                   {sig.slice(0, 25).map((r: any) => (
                     <tr key={r.id}><Td className="font-medium">{r.name}</Td><Td>{r.zone}</Td><Td className="tabular">{r.lux}</Td><Td className="tabular">{r.z}</Td><Td className="tabular">{r.neighbours}</Td>
                       <Td><span className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-full" style={{ background: HOT[r.label].color }} />{HOT[r.label].label}</span></Td></tr>
