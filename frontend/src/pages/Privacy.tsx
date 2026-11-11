@@ -16,7 +16,7 @@ export default function Privacy() {
         <p><strong>Why:</strong> to find the light you are describing, check it, and pass verified problems to the people who can fix them.</p>
         <p><strong>Contact details are optional</strong> and stored only if you tick the consent box. They are visible to project moderators only, are never shown publicly, and are excluded from every data export.</p>
         <p><strong>Photographs</strong> are re-encoded on upload, which removes embedded metadata such as GPS position and device details. They are visible to moderators only. Please avoid photographing people, house numbers or vehicle number plates.</p>
-        <p><strong>Your IP address is not stored with your report.</strong> A salted, one-way hash of it is kept to limit spam; it cannot be turned back into an address. Rate limiting holds addresses in memory briefly and discards them.</p>
+        <p><strong>Your IP address is not stored with your report.</strong> A salted, one-way hash of it is kept to limit spam; it cannot be turned back into an address. Rate limiting also keeps only a salted hash of your address, and deletes it within a day.</p>
       </S>
       <S title="What becomes public">
         <p>Nothing, until a moderator has reviewed your report. After review, the public map shows only the category, status, date and a position rounded to about 100 metres. Your description, photograph and contact details are never published.</p>
