@@ -2,8 +2,6 @@
 from __future__ import annotations
 
 import hashlib
-import time
-from collections import defaultdict, deque
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
@@ -98,31 +96,47 @@ require_staff = require_roles("auditor", "moderator")
 
 
 class RateLimiter:
-    """Small in-memory sliding-window limiter (per process).
+    """Sliding-window limiter stored in the database, so limits survive restarts
+    and are shared by every server process using the same database.
+    Keys are stored as salted SHA-256 hashes, never as raw IP addresses."""
 
-    Adequate for a single-instance deployment. Put a shared store (e.g. Redis)
-    behind the same interface if you scale to several instances.
-    """
-
-    def __init__(self) -> None:
-        self._hits: dict[str, deque[float]] = defaultdict(deque)
+    def _hash(self, key: str) -> str:
+        return hashlib.sha256(f"{get_settings().secret_key}|{key}".encode()).hexdigest()
 
     def check(self, key: str, limit: int, window_seconds: int) -> None:
-        now = time.monotonic()
-        q = self._hits[key]
-        while q and now - q[0] > window_seconds:
-            q.popleft()
-        if len(q) >= limit:
-            retry = int(window_seconds - (now - q[0])) + 1
-            raise HTTPException(
-                status.HTTP_429_TOO_MANY_REQUESTS,
-                "Too many requests. Please try again later.",
-                headers={"Retry-After": str(retry)},
-            )
-        q.append(now)
+        from sqlalchemy import delete, func, select
+
+        from .db import SessionLocal
+        from .models import RateLimitHit, utcnow
+
+        now = utcnow()
+        since = now - timedelta(seconds=window_seconds)
+        h = self._hash(key)
+        with SessionLocal() as db:
+            db.execute(delete(RateLimitHit).where(RateLimitHit.created_at < now - timedelta(days=1)))
+            count, oldest = db.execute(
+                select(func.count(RateLimitHit.id), func.min(RateLimitHit.created_at))
+                .where(RateLimitHit.key_hash == h, RateLimitHit.created_at >= since)).one()
+            if count >= limit:
+                db.commit()
+                retry = int(window_seconds - (now - oldest).total_seconds()) + 1 if oldest else window_seconds
+                raise HTTPException(
+                    status.HTTP_429_TOO_MANY_REQUESTS,
+                    "Too many requests. Please try again later.",
+                    headers={"Retry-After": str(max(retry, 1))},
+                )
+            db.add(RateLimitHit(key_hash=h, created_at=now))
+            db.commit()
 
     def reset(self) -> None:
-        self._hits.clear()
+        from sqlalchemy import delete
+
+        from .db import SessionLocal
+        from .models import RateLimitHit
+
+        with SessionLocal() as db:
+            db.execute(delete(RateLimitHit))
+            db.commit()
 
 
 limiter = RateLimiter()

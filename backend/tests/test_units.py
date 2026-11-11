@@ -174,3 +174,17 @@ def test_priority_formula():
     assert priority(_obs(), loc, RULE) == (34.0, "medium")
     dead = _obs(classification="non_functional", pedestrian_activity="high", verification_status="expert_verified")
     assert priority(dead, loc, RULE) == (100.0, "high")
+
+
+def test_rate_limit_survives_restart():
+    from fastapi import HTTPException
+
+    from app.security import RateLimiter
+    first = RateLimiter()
+    for _ in range(3):
+        first.check("unit:1.2.3.4", 3, 60)
+    restarted = RateLimiter()  # a new process sees the same database
+    with pytest.raises(HTTPException) as e:
+        restarted.check("unit:1.2.3.4", 3, 60)
+    assert e.value.status_code == 429
+    restarted.check("unit:5.6.7.8", 3, 60)  # other clients are unaffected

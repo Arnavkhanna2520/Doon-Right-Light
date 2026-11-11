@@ -1,7 +1,7 @@
 import L from "leaflet";
 import { HeatLayer } from "leaflet.heat";
 import { useLeafletContext } from "@react-leaflet/core";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { LayerGroup, LayersControl, MapContainer, Marker, Popup, Rectangle, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import { Link } from "react-router-dom";
 import { get, type Feature, type Rec } from "../lib/api";
@@ -51,9 +51,30 @@ function Heat({ points }: { points: [number, number, number][] }) {
   return null;
 }
 
-function FlyTo({ target }: { target: [number, number] | null }) {
+/** When an area is picked, frame all of its dots once they have loaded (no animation, so it never stops halfway). */
+function FitArea({ area, features }: { area: string | null; features: Feature[] }) {
   const map = useMap();
-  useEffect(() => { if (target) map.flyTo(target, 15, { duration: 0.6 }); }, [map, target]);
+  const done = useRef<string | null>(null);
+  useEffect(() => {
+    if (area === null || done.current === area || features.length === 0) return;
+    if (area && !features.every((f) => f.zone === area)) return; // wait for the filtered list
+    const b = L.latLngBounds(features.map((f) => [f.latitude, f.longitude] as [number, number]));
+    map.fitBounds(b, { padding: [40, 40], maxZoom: 16, animate: false });
+    done.current = area;
+  }, [map, area, features]);
+  return null;
+}
+
+/** When a place is picked from the list, centre on it and open its popup. */
+function OpenSelected({ selected, markers }: { selected: { id: number; n: number } | null; markers: React.MutableRefObject<Map<number, L.Marker>> }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!selected) return;
+    const m = markers.current.get(selected.id);
+    if (!m) return;
+    map.setView(m.getLatLng(), Math.max(map.getZoom(), 16), { animate: false });
+    m.openPopup();
+  }, [map, selected, markers]);
   return null;
 }
 
@@ -93,10 +114,11 @@ function LocationPopup({ f }: { f: Feature }) {
 
 export interface PublicReport { public_id: string; category: string; status: string; is_demo: boolean; latitude: number; longitude: number; submitted_at: string }
 
-export default function MapView({ features, reports = [], focus = null, height = "70vh" }: {
-  features: Feature[]; reports?: PublicReport[]; focus?: [number, number] | null; height?: string;
+export default function MapView({ features, reports = [], area = null, selected = null, height = "70vh" }: {
+  features: Feature[]; reports?: PublicReport[]; area?: string | null; selected?: { id: number; n: number } | null; height?: string;
 }) {
   const { meta, theme } = useApp();
+  const markers = useRef(new Map<number, L.Marker>());
   const shown = useMemo(() => features.slice(0, MAX_MARKERS), [features]);
   const heat = useMemo(() => {
     const lux = features.filter((f) => f.latest.lux !== null);
@@ -108,7 +130,8 @@ export default function MapView({ features, reports = [], focus = null, height =
   return (
     <div style={{ height }} className="relative overflow-hidden rounded-2xl border border-line">
       <MapContainer center={a.center} zoom={13} minZoom={10} maxZoom={18} scrollWheelZoom className="size-full" aria-label="Map of Dehradun lighting observations">
-        <FlyTo target={focus} />
+        <FitArea area={area} features={features} />
+        <OpenSelected selected={selected} markers={markers} />
         <LayersControl position="topright" collapsed key={theme}>
           {(theme === "dark" ? ["night", "day", "streets"] as const : ["day", "night", "streets"] as const).map((k, i) => (
             <LayersControl.BaseLayer key={k} checked={i === 0} name={`${BASEMAPS[k].name} basemap`}>
@@ -118,7 +141,7 @@ export default function MapView({ features, reports = [], focus = null, height =
           <LayersControl.Overlay checked name={`Lighting observations (${shown.length})`}>
             <LayerGroup>
               {shown.map((f) => (
-                <Marker key={f.id} position={[f.latitude, f.longitude]} icon={iconFor(f.latest.classification, f.latest.data_origin === "demo")}
+                <Marker key={f.id} ref={(m) => { if (m) markers.current.set(f.id, m); else markers.current.delete(f.id); }} position={[f.latitude, f.longitude]} icon={iconFor(f.latest.classification, f.latest.data_origin === "demo")}
                   title={`${f.name}: ${CLASS_META[f.latest.classification]?.label}`} alt={`${f.name}: ${CLASS_META[f.latest.classification]?.label}`}>
                   <Popup maxWidth={320}><LocationPopup f={f} /></Popup>
                 </Marker>

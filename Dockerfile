@@ -17,4 +17,4 @@ COPY --from=web /web/dist /app/frontend/dist
 RUN useradd --create-home appuser && mkdir -p /app/backend/data && chown -R appuser /app
 USER appuser
 EXPOSE 8000
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers"]
+CMD ["sh", "-c", "alembic upgrade head && if [ \"$DRL_LOAD_DEMO\" = true ]; then python -m app.cli seed-demo --if-empty; fi && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers"]

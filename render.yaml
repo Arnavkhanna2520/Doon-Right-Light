@@ -13,6 +13,9 @@ services:
         generateValue: true
       - key: DRL_TRUST_PROXY
         value: "true"
+      # Loads the clearly-labelled demo data on first start only. Set to "false" once real data is in.
+      - key: DRL_LOAD_DEMO
+        value: "true"
       - key: DRL_DATABASE_URL
         fromDatabase:
           name: doon-right-light-db

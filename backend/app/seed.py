@@ -34,8 +34,10 @@ AREAS = [
     ("Dalanwala", 30.3117, 78.0577), ("Ballupur", 30.3331, 78.0113), ("Sahastradhara Road", 30.3541, 78.0823),
     ("Doon IT Park", 30.3616, 78.0825),
     ("UPES Bidholi", 30.4159, 77.9670),
-    # Added from user-supplied approximate centres (not independently verified).
-    ("Kandoli", 30.3904, 77.9675), ("Selaqui", 30.3566, 77.8546), ("Patel Nagar", 30.3160, 78.0050),
+    # Checked against OpenStreetMap, Nov 2026: Bidholi village (30.3904, 77.9675) and Selaqui (near ESI dispensary).
+    ("Bidholi village", 30.3904, 77.9675), ("Selaqui", 30.3566, 77.8546),
+    # User-supplied approximate centres, not yet checked against a map source.
+    ("Patel Nagar", 30.3160, 78.0050),
     ("Ajabpur", 30.2895, 78.0329), ("Karanpur", 30.3370, 78.0450), ("Tapovan", 30.3480, 78.0810),
     ("Race Course", 30.3150, 78.0470), ("Vasant Vihar", 30.3210, 78.0060), ("Nehru Colony", 30.2940, 78.0450),
     ("Rispana", 30.2961, 78.0562), ("Dehradun Cantonment", 30.3280, 78.0120), ("Jakhan", 30.3780, 78.0750),

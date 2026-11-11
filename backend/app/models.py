@@ -196,3 +196,11 @@ class AuditLog(Base):
 
 
 Index("ix_obs_loc_time", Observation.location_id, Observation.measured_at)
+
+
+class RateLimitHit(Base):
+    """One request counted against a rate limit. The key is a salted hash, never a raw IP address."""
+    __tablename__ = "rate_limit_hits"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    key_hash: Mapped[str] = mapped_column(String(64), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)

@@ -233,6 +233,7 @@ function Users() {
   const { user } = useApp();
   const { data, error, reload } = useApi("/admin/users");
   const [f, setF] = useState({ email: "", full_name: "", password: "", role: "moderator" });
+  const [reset, setReset] = useState<{ id: number; email: string; password: string } | null>(null);
   const { busy, run, feedback } = useAction();
   return (
     <Card title="Staff accounts" hint="Administrators manage everything. Auditors upload and verify measurements. Moderators review citizen reports.">
@@ -244,9 +245,16 @@ function Users() {
               <Td><select aria-label={`Role for ${u.email}`} className={cx(inputCls, "w-36 py-1")} value={u.role} disabled={u.id === user?.id} onChange={(e) => run(`r${u.id}`, () => send("PATCH", `/admin/users/${u.id}`, { role: e.target.value }), "Role updated.").then((ok) => ok && reload())}>
                 {["admin", "auditor", "moderator"].map((r) => <option key={r} value={r}>{human(r)}</option>)}</select></Td>
               <Td>{u.is_active ? <Badge tone="ok">Active</Badge> : <Badge>Disabled</Badge>}</Td>
-              <Td>{u.id !== user?.id && <Button small variant="outline" busy={busy === `a${u.id}`} onClick={() => run(`a${u.id}`, () => send("PATCH", `/admin/users/${u.id}`, { is_active: !u.is_active }), u.is_active ? "Account disabled." : "Account enabled.").then((ok) => ok && reload())}>{u.is_active ? "Disable" : "Enable"}</Button>}</Td></tr>
+              <Td>{u.id !== user?.id && <Button small variant="outline" busy={busy === `a${u.id}`} onClick={() => run(`a${u.id}`, () => send("PATCH", `/admin/users/${u.id}`, { is_active: !u.is_active }), u.is_active ? "Account disabled." : "Account enabled.").then((ok) => ok && reload())}>{u.is_active ? "Disable" : "Enable"}</Button>}
+                {u.id !== user?.id && <Button small variant="outline" onClick={() => setReset({ id: u.id, email: u.email, password: "" })}>Reset password</Button>}</Td></tr>
           ))}
         </Table>
+      )}
+      {reset && (
+        <form className="mt-4 grid max-w-xl gap-3 rounded-xl border border-line bg-raised p-4 sm:grid-cols-[1fr_auto]" onSubmit={(e) => { e.preventDefault(); run("reset", () => send("PATCH", `/admin/users/${reset.id}`, { password: reset.password }), `Password reset for ${reset.email}. Give them the new temporary password privately and ask them to change it after signing in.`).then((ok) => ok && setReset(null)); }}>
+          <Field label={`New temporary password for ${reset.email}`} required hint="10+ characters with an upper-case letter and a digit"><Input required type="password" minLength={10} value={reset.password} onChange={(e) => setReset({ ...reset, password: e.target.value })} autoComplete="new-password" /></Field>
+          <div className="flex items-end gap-2"><Button type="submit" busy={busy === "reset"}>Set password</Button><Button type="button" variant="outline" onClick={() => setReset(null)}>Cancel</Button></div>
+        </form>
       )}
       <h3 className="mb-3 mt-6 text-sm font-semibold">Add a staff account</h3>
       <form className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" onSubmit={(e) => { e.preventDefault(); run("add", () => send("POST", "/admin/users", f), "Account created.").then((ok) => { if (ok) { setF({ email: "", full_name: "", password: "", role: "moderator" }); reload(); } }); }}>

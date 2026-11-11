@@ -79,7 +79,18 @@ To run it the way production does, build the frontend (`npm run build`) and open
 
 API documentation is available at `http://localhost:8000/api/docs` in development.
 
+### Forgotten passwords
+
+An administrator can set a new temporary password for any other staff account in **Admin > Staff accounts > Reset password**. If the only administrator is locked out, run this on the server:
+
+```
+python -m app.cli reset-password you@example.org
+```
+
 ## Environment variables
+
+`DRL_LOAD_DEMO=true` (set in `render.yaml`) loads the labelled demo data on the first start only, when the database is empty. Set it to `false` once real data is imported.
+
 
 All variables are prefixed `DRL_`. See [`.env.example`](.env.example).
 
@@ -174,7 +185,7 @@ Satellite radiance records light travelling upward at about 01:30, one value per
 - Activity log of sign-ins, reviews, imports, exports and configuration changes
 - Secrets come from environment variables; nothing sensitive is in the frontend bundle
 
-Known limits: the rate limiter is in-memory, so it is per process; put a shared store behind it before running several instances. There is no email verification or password reset flow; administrators set and reset staff passwords.
+Known limits: rate-limit counts are kept in the database (as salted hashes, not IP addresses), so they survive restarts and are shared between processes. There is no email-based password reset; administrators reset staff passwords (see above).
 
 ## Tests
 
@@ -221,8 +232,7 @@ docker run -p 8000:8000 -e DRL_SECRET_KEY=change-me -e DRL_DATABASE_URL=postgres
 - This is a student project, not an official service of any government body.
 - Demo data is synthetic and labelled. Coordinates for some demo areas are approximate and not independently verified.
 - Satellite data (NASA Black Marble) is not connected. The integration is a placeholder.
-- The public deployment (Render or Docker) has not been run yet.
-- Passwords cannot be reset from the site. Rate limits are held in memory and reset when the server restarts.
+- The production setup was tested against PostgreSQL 16 (migrations, demo seeding, sign-in, exports, rate limits), but the Docker image and the Render blueprint have not yet been run on Render itself.
 
 ## Licence
 
