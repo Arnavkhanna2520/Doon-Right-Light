@@ -33,6 +33,7 @@ AREAS = [
     ("Paltan Bazaar", 30.3201, 78.0352), ("ISBT", 30.2892, 77.9987), ("Prem Nagar", 30.3340, 77.9602),
     ("Dalanwala", 30.3117, 78.0577), ("Ballupur", 30.3331, 78.0113), ("Sahastradhara Road", 30.3541, 78.0823),
     ("Doon IT Park", 30.3616, 78.0825),
+    ("UPES Bidholi", 30.4159, 77.9670),
 ]
 POINTS_PER_AREA = 10
 SPREAD = 0.0042  # about 450 m

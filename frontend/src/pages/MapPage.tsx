@@ -36,6 +36,16 @@ export default function MapPage() {
         </div>
       )}
       <Filters value={filters} onChange={setFilters} search />
+      <div className="mt-4 rounded-xl border border-line bg-surface p-4 text-sm">
+        <p className="font-semibold">How to read this map</p>
+        <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
+          <li><strong style={{ color: "var(--c-excess)" }}>Orange glow</strong>: the light is too bright and wastes energy.</li>
+          <li><strong style={{ color: "var(--c-insufficient)" }}>Blue dot</strong>: the light is too dim to see the road properly.</li>
+          <li><strong style={{ color: "var(--c-adequate)" }}>Green glow</strong>: the light is about right.</li>
+          <li><strong style={{ color: "var(--c-broken)" }}>Red circle with a cross</strong>: the light is not working.</li>
+        </ul>
+        <p className="mt-2 text-xs text-muted">Click any dot for its reading and what should be done. Pick an area above to zoom in. Dots marked as demo are examples, not real measurements.</p>
+      </div>
       <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_20rem]">
         <div>
           {error ? <ErrorBox message={error} retry={reload} /> : <MapView features={items} reports={reports.data?.items ?? []} focus={focus} />}
