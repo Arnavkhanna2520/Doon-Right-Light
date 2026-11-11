@@ -128,7 +128,7 @@ export default function MapView({ features, reports = [], focus = null, height =
           <LayersControl.Overlay name="Heatmap of ground lux readings">
             <LayerGroup><Heat points={heat} /></LayerGroup>
           </LayersControl.Overlay>
-          <LayersControl.Overlay checked name={`Reviewed citizen reports (${reports.length})`}>
+          <LayersControl.Overlay name={`Reviewed citizen reports (${reports.length})`}>
             <LayerGroup>
               {reports.map((r) => (
                 <Marker key={r.public_id} position={[r.latitude, r.longitude]} icon={reportIcon} title={`Citizen report: ${REPORT_CATEGORY[r.category]}`}>

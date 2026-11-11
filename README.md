@@ -219,7 +219,11 @@ docker run -p 8000:8000 -e DRL_SECRET_KEY=change-me -e DRL_DATABASE_URL=postgres
 - Energy figures are estimates from nameplate wattage, not metered consumption.
 - Citizen reports are leads, not measurements.
 - This is a student project, not an official service of any government body.
+- Demo data is synthetic and labelled. Coordinates for some demo areas are approximate and not independently verified.
+- Satellite data (NASA Black Marble) is not connected. The integration is a placeholder.
+- The public deployment (Render or Docker) has not been run yet.
+- Passwords cannot be reset from the site. Rate limits are held in memory and reset when the server restarts.
 
 ## Licence
 
-No licence has been chosen yet. Add one (for example MIT) before inviting outside contributions.
+Released under the MIT Licence. See `LICENSE`.
