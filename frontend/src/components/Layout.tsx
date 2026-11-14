@@ -1,4 +1,4 @@
-import { FlaskConical, LogOut, Menu, Moon, Sun, X } from "lucide-react";
+import { FlaskConical, LogOut, Menu, Moon, ShieldCheck, Sun, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { can, useApp } from "../lib/hooks";
@@ -15,9 +15,15 @@ export function Logo({ className = "size-8" }: { className?: string }) {
   );
 }
 
+// Public pages: anyone can use these without an account.
 const NAV: [string, string][] = [
-  ["/dashboard", "Dashboard"], ["/map", "Map"], ["/analysis", "Analysis"], ["/audit", "Audit"],
-  ["/recommendations", "Recommendations"], ["/calculator", "Calculator"], ["/downloads", "Reports"], ["/guide", "Guide"],
+  ["/dashboard", "Dashboard"], ["/map", "Map"], ["/analysis", "Analysis"],
+  ["/recommendations", "Recommendations"], ["/calculator", "Calculator"], ["/guide", "Guide"],
+];
+// Staff pages: shown only after signing in, in their own bar, filtered by role.
+const STAFF: [string, string, string[]][] = [
+  ["/upload", "Upload data", ["auditor"]], ["/records", "Records", ["auditor", "moderator"]],
+  ["/downloads", "Reports", ["auditor", "moderator"]], ["/admin", "Admin", ["auditor", "moderator"]],
 ];
 
 export default function Layout() {
@@ -28,6 +34,7 @@ export default function Layout() {
   const link = ({ isActive }: { isActive: boolean }) =>
     cx("whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition", isActive ? "bg-raised text-ink" : "text-muted hover:text-ink");
   const home = loc.pathname === "/";
+  const staff = user ? STAFF.filter(([, , roles]) => can(user, ...roles)) : [];
   return (
     <div className="flex min-h-screen flex-col">
       <a href="#main" className="skip-link">Skip to content</a>
@@ -48,10 +55,9 @@ export default function Layout() {
             </button>
             {user ? (
               <>
-                {can(user, "moderator", "auditor") && <NavLink to="/admin" className={({ isActive }) => cx(link({ isActive }), "hidden sm:block")}>Admin</NavLink>}
                 <button onClick={() => logout()} className="hidden items-center gap-1 rounded-md px-2 py-1.5 text-sm text-muted hover:text-ink sm:flex" title={`Signed in as ${user.email}`}><LogOut className="size-4" aria-hidden /><span className="whitespace-nowrap">Sign out</span></button>
               </>
-            ) : <NavLink to="/login" className={({ isActive }) => cx(link({ isActive }), "hidden sm:block")}>Sign in</NavLink>}
+            ) : <NavLink to="/login" className={({ isActive }) => cx(link({ isActive }), "hidden sm:block")}>Staff sign in</NavLink>}
             <button className="rounded-md p-2 text-muted hover:bg-raised xl:hidden" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-nav" aria-label="Menu">
               {open ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
@@ -61,9 +67,19 @@ export default function Layout() {
           <nav id="mobile-nav" aria-label="Mobile" className="grid gap-1 border-t border-line bg-surface px-4 py-3 xl:hidden">
             {NAV.map(([to, label]) => <NavLink key={to} to={to} className={link}>{label}</NavLink>)}
             <NavLink to="/report" className={link}>Report an issue</NavLink>
-            {user && can(user, "moderator", "auditor") && <NavLink to="/admin" className={link}>Admin</NavLink>}
+            {staff.length > 0 && <p className="mt-2 px-2.5 text-xs font-semibold uppercase tracking-wide text-muted">Staff</p>}
+            {staff.map(([to, label]) => <NavLink key={to} to={to} className={link}>{label}</NavLink>)}
             {user ? <button onClick={() => logout()} className="rounded-md px-2.5 py-1.5 text-left text-sm font-medium text-muted">Sign out ({user.email})</button>
               : <NavLink to="/login" className={link}>Staff sign in</NavLink>}
+          </nav>
+        )}
+        {staff.length > 0 && !home && (
+          <nav aria-label="Staff" className="hidden border-t border-line bg-surface sm:block">
+            <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 py-1.5">
+              <span className="mr-2 flex shrink-0 items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted"><ShieldCheck className="size-4" aria-hidden />Staff area</span>
+              {staff.map(([to, label]) => <NavLink key={to} to={to} className={link}>{label}</NavLink>)}
+              <span className="ml-auto shrink-0 text-xs text-muted">Signed in as {user?.email} ({user?.role})</span>
+            </div>
           </nav>
         )}
       </header>

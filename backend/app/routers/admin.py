@@ -106,7 +106,7 @@ def report_photo(report_id: int, db: Session = Depends(get_db), _: m.User = Depe
 @router.get("/observations")
 def list_observations(
     classification_: str | None = Query(None, alias="classification"), verification: str | None = None,
-    origin: str | None = None, q: str | None = Query(None, max_length=100),
+    origin: str | None = None, q: str | None = Query(None, max_length=100), dataset_id: int | None = None,
     page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db), _: m.User = Depends(require_staff),
 ):
@@ -117,8 +117,10 @@ def list_observations(
         stmt = stmt.where(m.Observation.verification_status == verification)
     if origin:
         stmt = stmt.where(m.Observation.data_origin == origin)
+    if dataset_id is not None:
+        stmt = stmt.where(m.Observation.dataset_id == dataset_id)
     if q:
-        stmt = stmt.where(m.Location.name.ilike(f"%{q}%"))
+        stmt = stmt.where(or_(m.Location.name.ilike(f"%{q}%"), m.Location.zone.ilike(f"%{q}%")))
     total, rows = paginate(db, stmt, page, page_size)
     items = []
     for o in rows:

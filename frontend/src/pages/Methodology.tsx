@@ -2,11 +2,9 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Card, ClassLabel, Note, PageHeader } from "../components/ui";
 import { human } from "../lib/format";
-import { useApi, useApp, usePageMeta } from "../lib/hooks";
+import { useApi, usePageMeta } from "../lib/hooks";
 
 const SOURCES: [string, string, string][] = [
-  ["NASA Black Marble VNP46A2", "Daily moonlight- and atmosphere-corrected night-time radiance, about 500 m, from 2012. Optional integration; not active unless configured.", "https://ladsweb.modaps.eosdis.nasa.gov/missions-and-measurements/products/VNP46A2/"],
-  ["Google Earth Engine catalogue: NASA/VIIRS/002/VNP46A2", "How the optional integration reads Black Marble.", "https://developers.google.com/earth-engine/datasets/catalog/NASA_VIIRS_002_VNP46A2"],
   ["OpenStreetMap", "Base map tiles. © OpenStreetMap contributors, Open Database Licence.", "https://www.openstreetmap.org/copyright"],
   ["IS 1944: Code of practice for lighting of public thoroughfares (BIS)", "The Indian road-lighting reference. Thresholds must be taken from the applicable edition by an administrator; none are built in.", "https://www.services.bis.gov.in/php/BIS_2.0/bisconnect/knowyourstandards/Indian_standards/isdetails/NjcwMDU="],
   ["CPCB submission to the National Green Tribunal (reported April 2025)", "States that India has no statutory framework regulating light pollution.", "https://www.deccanherald.com/india/karnataka/bengaluru/no-statutory-framework-in-india-to-regulate-light-pollution-cpcb-tells-green-tribunal-3515178"],
@@ -15,7 +13,6 @@ const SOURCES: [string, string, string][] = [
 
 export default function Methodology() {
   usePageMeta("Methodology and limitations", "How Doon Right-Light classifies lighting, scores priority and detects hotspots, with data sources and limitations.");
-  const { meta } = useApp();
   const th = useApi("/thresholds");
   const { hash } = useLocation();
   useEffect(() => { if (hash) document.querySelector(hash)?.scrollIntoView(); }, [hash]);
@@ -25,10 +22,9 @@ export default function Methodology() {
       <PageHeader title="Methodology and limitations" lead="What the platform measures, how it reaches each classification, and what it cannot tell you." />
 
       <section className="space-y-3">
-        <H id="provenance">Four kinds of data, always labelled</H>
+        <H id="provenance">Three kinds of data, always labelled</H>
         <ul className="space-y-2 text-sm">
           <li><strong>Ground-measured observations</strong> – lux readings and fixture records collected on the street and uploaded by an auditor. Unverified until checked.</li>
-          <li><strong>Satellite-derived observations</strong> – night-time radiance from NASA Black Marble. Used only for city-wide context. {meta?.satellite.configured ? "Configured in this deployment." : "Not integrated in this deployment, so no satellite values are shown anywhere."}</li>
           <li><strong>Citizen reports</strong> – submitted by the public. Leads to verify, never measurements. Hidden from the public map until reviewed.</li>
           <li><strong>Synthetic demonstration data</strong> – invented readings scattered around real Dehradun areas so the map looks as it will with real surveys. The places are real; every value is made up. Labelled DEMO everywhere, drawn with a dotted outer ring, and impossible to mark as verified.</li>
         </ul>
@@ -78,11 +74,6 @@ export default function Methodology() {
         <H id="hotspots">Hotspot analysis</H>
         <p className="text-sm">The Getis-Ord Gi* statistic compares the sum of lux values around each location (inside a chosen distance band, including the location itself) with what would be expected if values were scattered at random. The result is a z-score. Values beyond ±1.65, ±1.96 and ±2.58 are reported as significant at 90%, 95% and 99%.</p>
         <p className="text-sm text-muted">It needs at least 30 locations with a lux reading. Results depend on the distance band, uneven sampling can create or hide clusters, and testing many locations at once produces some false positives. A high-lux cluster is not proof of excessive lighting.</p>
-      </section>
-
-      <section className="space-y-3">
-        <H id="satellite">Why satellite data is not enough</H>
-        <ul className="list-disc space-y-1.5 pl-5 text-sm">{meta?.satellite.limitations.map((l) => <li key={l}>{l}</li>)}</ul>
       </section>
 
       <section className="space-y-3">

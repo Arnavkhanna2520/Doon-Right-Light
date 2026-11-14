@@ -138,7 +138,8 @@ def test_csv_upload_validate_import_flow(admin, auditor, client):
 
 
 def test_upload_rejects_wrong_files(auditor):
-    assert upload(auditor, name="data.xlsx").status_code == 415
+    assert upload(auditor, name="data.pdf").status_code == 415
+    assert upload(auditor, name="data.xlsx").status_code == 422  # CSV text with an .xlsx name is not a workbook
     assert upload(auditor, content="x" * (6 * 1024 * 1024)).status_code == 413
     r = upload(auditor, content="foo,bar\n1,2\n")
     assert r.status_code == 201 and r.json()["report"]["summary"]["can_import"] is False
@@ -307,3 +308,38 @@ def test_manual_location_and_safety_flag(admin, auditor, client):
                                                               "safety_context": "School gate"}).status_code == 200
     assert auditor.delete(f"/api/admin/locations/{lid}").status_code == 200
     assert client.get(f"/api/locations/{lid}").status_code == 404
+
+
+def test_excel_upload_and_records_view(admin, auditor):
+    import csv
+    import io
+
+    from openpyxl import Workbook, load_workbook
+    tmpl = auditor.get("/api/datasets/template.xlsx")
+    assert tmpl.status_code == 200
+    assert load_workbook(io.BytesIO(tmpl.content)).active["A1"].value == "location"
+
+    wb = Workbook()
+    ws = wb.active
+    for row in csv.reader(io.StringIO(GOOD_CSV)):
+        ws.append(row)
+    buf = io.BytesIO()
+    wb.save(buf)
+    r = auditor.post("/api/datasets/validate",
+                     files={"file": ("survey.xlsx", buf.getvalue(),
+                                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+                     data={"data_origin": "ground_measured", "source_note": "excel test"})
+    assert r.status_code == 201, r.text
+    ds = r.json()
+    assert ds["valid_count"] == 5
+    assert auditor.post(f"/api/datasets/{ds['id']}/import").json()["imported_observations"] == 5
+
+    items = auditor.get("/api/datasets").json()["items"]
+    mine = next(d for d in items if d["id"] == ds["id"])
+    assert mine["records"] == 5 and mine["uploaded_by"] == "auditor@example.org" and mine["status"] == "imported"
+    recs = auditor.get(f"/api/admin/observations?dataset_id={ds['id']}").json()
+    assert recs["total"] == 5
+
+    bad = auditor.post("/api/datasets/validate", files={"file": ("broken.xlsx", b"not a workbook", "application/octet-stream")})
+    assert bad.status_code == 422 and "Excel" in bad.json()["detail"]
+    assert auditor.post("/api/datasets/validate", files={"file": ("x.txt", b"a,b", "text/plain")}).status_code == 415

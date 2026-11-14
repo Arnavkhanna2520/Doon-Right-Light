@@ -15,10 +15,12 @@ The aim is not to remove streetlights. It is to light streets properly and stop 
 | Home page | Interactive night-sky hero (drag to shield the streetlights and watch the stars return), then the problem, the method and how to take part |
 | Guide | A plain-language page explaining every page in three steps, linked from each page header |
 | Themes | Night (default) and light modes with a switch in the navigation bar; the choice is remembered |
-| Dashboard | KPI cards and charts (condition, zone comparison, monthly trend, priority, energy estimate, citizen reports), all driven by shared filters |
+| Public and staff areas | The main menu holds only public pages (Dashboard, Map, Analysis, Recommendations, Calculator, Guide, Report an issue). Staff pages (Upload data, Records, Reports, Admin) appear in a separate Staff bar after signing in, filtered by role |
+| Dashboard | One-sentence summary, four cards (places checked, too bright, too dim, not working) and four charts: overall condition, the 10 areas needing most attention, condition in every area, residents' reports. All driven by shared filters |
 | Interactive map | OpenStreetMap + Leaflet. Markers are drawn as points of light whose glow reflects the condition; a dotted outer ring marks demo data. Night, light and street basemaps. Popups show measurement, fixture, verification and suggested action. Layer control, lux heatmap, legend, search, filters |
-| Analysis | Lux distributions, road-type comparison, data-quality indicators, Getis-Ord Gi\* hotspots, and a plain statement of what satellite data can and cannot show |
-| Lighting audit | CSV upload with validation (missing values, duplicates, wrong types, inconsistent values), preview, cleaned-data download, import |
+| Analysis | Clusters of bright lights and of dark spots, grouped by area (Getis-Ord Gi\* within 500 m, explained on the Methodology page), and a chart of how bright the places are |
+| Upload data (staff) | Excel (.xlsx) or CSV upload with an Excel or CSV template; every row checked (missing values, duplicates, wrong types, inconsistent values), preview, cleaned-data download, import |
+| Records (staff) | Every uploaded file (when, by whom, rows saved) and a searchable list of all readings, filterable by file |
 | Citizen reporting | Public form with optional map pin and photo, report ID, status tracking, duplicate linking, spam protection |
 | Admin panel | Report moderation, observation verification, locations, thresholds, staff accounts, activity log, demo-data controls |
 | Recommendations | Rule-based, safety-aware suggestions with the evidence for each |
@@ -149,7 +151,7 @@ Applied in order to the latest observation at each location:
 
 ## CSV format for surveys
 
-Download the template from the Lighting audit page or `GET /api/datasets/template.csv`.
+Download the template from the Upload data page: `GET /api/datasets/template.xlsx` (Excel) or `GET /api/datasets/template.csv`. Excel files are read from their first sheet and checked exactly like a CSV.
 
 Required: `location`, `latitude`, `longitude`, `road_type`, `measured_at`.
 Optional: `lux`, `zone`, `weather`, `fixture_status`, `fixture_wattage`, `shielding`, `light_direction`, `pedestrian_activity`, `vehicle_activity`, `safety_critical`, `safety_context`, `notes`.
@@ -166,7 +168,7 @@ Common header variants (`Lux Measurement`, `Date Time`, `Lighting Direction`…)
 | [NASA Black Marble VNP46A2](https://ladsweb.modaps.eosdis.nasa.gov/missions-and-measurements/products/VNP46A2/) | City-wide night-time radiance, about 500 m | **Not integrated by default** |
 | IS 1944 (BIS) | Source for thresholds | Not included; enter values yourself |
 
-### Satellite data
+### Satellite data (future work, hidden from the site)
 
 `backend/app/integrations/black_marble.py` is an integration point for Black Marble through Google Earth Engine (`NASA/VIIRS/002/VNP46A2`). It is inactive unless you install `earthengine-api` and set `DRL_GEE_SERVICE_ACCOUNT` and `DRL_GEE_KEY_FILE`. The site shows the integration status honestly on the Analysis page. **The fetch function has not been run against live Earth Engine**, and no page displays satellite values yet; treat it as a starting point.
 
@@ -231,7 +233,7 @@ docker run -p 8000:8000 -e DRL_SECRET_KEY=change-me -e DRL_DATABASE_URL=postgres
 - Citizen reports are leads, not measurements.
 - This is a student project, not an official service of any government body.
 - Demo data is synthetic and labelled. Coordinates for some demo areas are approximate and not independently verified.
-- Satellite data (NASA Black Marble) is not connected. The integration is a placeholder.
+- Satellite data (NASA Black Marble) is not connected and is hidden from the site. The integration code is kept, switched off, as future work.
 - The production setup was tested against PostgreSQL 16 (migrations, demo seeding, sign-in, exports, rate limits), but the Docker image and the Render blueprint have not yet been run on Render itself.
 
 ## Licence

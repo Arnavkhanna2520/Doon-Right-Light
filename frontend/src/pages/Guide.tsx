@@ -1,4 +1,4 @@
-import { BarChart3, Calculator, ClipboardCheck, FileDown, LayoutDashboard, Lightbulb, MapPinned, MessageSquareWarning, Settings } from "lucide-react";
+import { BarChart3, Calculator, FileDown, FileSpreadsheet, LayoutDashboard, Lightbulb, MapPinned, MessageSquareWarning, Settings, Table2 } from "lucide-react";
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Note, PageHeader } from "../components/ui";
@@ -6,22 +6,24 @@ import { usePageMeta } from "../lib/hooks";
 
 const PAGES = [
   { id: "dashboard", to: "/dashboard", icon: LayoutDashboard, name: "Dashboard", who: "Everyone", what: "The summary: how many places were checked and how many are too bright, too dim, broken or fine.",
-    steps: ["Read the sentence and the coloured Light balance bar at the top.", "Look at the number cards, then the charts.", "Change Area, Lighting category or the dates. Everything updates to match."] },
+    steps: ["Read the sentence and the coloured bar at the top.", "Look at the four cards (checked, too bright, too dim, not working), then “Areas that need the most attention”.", "Change Area, Lighting category or the dates. Everything updates to match."] },
   { id: "map", to: "/map", icon: MapPinned, name: "Map", who: "Everyone", what: "Every checked location shown on a map of Dehradun.",
     steps: ["Click an area button (for example Rajpur Road) to zoom there.", "Click any glowing dot to see its reading and what should be done.", "Use the layers button on the map to change the map style or switch the heatmap on."] },
-  { id: "analysis", to: "/analysis", icon: BarChart3, name: "Analysis", who: "Everyone", what: "Deeper statistics: where bright or dark readings cluster, and how reliable the data is.",
-    steps: ["Read the four data-quality bars first.", "Scroll to the hotspot table to see clusters.", "Change the distance band to see how the clusters change."] },
+  { id: "analysis", to: "/analysis", icon: BarChart3, name: "Analysis", who: "Everyone", what: "Where bright lights or dark spots are grouped together, so the team knows where to look first.",
+    steps: ["Read the two lists: clusters of bright lights and clusters of dark spots.", "“How clear” says how sure the site is that the group is real.", "Look at the chart below to see how bright the places are overall."] },
   { id: "recommendations", to: "/recommendations", icon: Lightbulb, name: "Recommendations", who: "Everyone", what: "A to-do list for the authorities, most urgent first.",
     steps: ["Read a card: it says what to do and where.", "Open “Evidence behind this recommendation” to see why.", "Filter by priority, action or area."] },
   { id: "calculator", to: "/calculator", icon: Calculator, name: "Calculator", who: "Everyone", what: "Estimates the electricity and money saved by changing lamp wattage.",
     steps: ["Type the number of lights, current watts and new watts.", "Add hours per night, days and the price per unit.", "Read the saving, or press PDF to download it."] },
   { id: "report", to: "/report", icon: MessageSquareWarning, name: "Report an issue", who: "Everyone, no account", what: "Lets any resident report a bad light or a dark road.",
     steps: ["Choose the problem and describe it.", "Say where it is, or click the small map to drop a pin.", "Submit and keep the report ID. Type it into “Track a report” to follow progress."] },
-  { id: "audit", to: "/audit", icon: ClipboardCheck, name: "Audit", who: "Team (sign in)", what: "Puts your real street measurements into the site.",
-    steps: ["Download the CSV template and fill in your readings. Put the real area name in the zone column.", "Choose the file and press Validate file. Fix any mistakes it lists.", "Press Import. The readings appear on the map and dashboard."] },
-  { id: "downloads", to: "/downloads", icon: FileDown, name: "Reports", who: "Team (sign in)", what: "Downloads the data as a PDF report or Excel-friendly CSV files.",
+  { id: "upload", to: "/upload", icon: FileSpreadsheet, name: "Upload data", who: "Staff (sign in)", what: "Puts your real street measurements into the site from an Excel or CSV file.",
+    steps: ["Download the Excel template and fill one row per reading. Put the area name in the zone column.", "Choose the file and press Check file. Fix any rows it lists.", "Press Import. The readings appear on the map and dashboard."] },
+  { id: "records", to: "/records", icon: Table2, name: "Records", who: "Staff (sign in)", what: "Every uploaded file, and every reading saved from it.",
+    steps: ["See each file: when it was uploaded, by whom, and how many readings it saved.", "Press View readings to see only that file's rows.", "Search by place or area, or download everything as CSV."] },
+  { id: "downloads", to: "/downloads", icon: FileDown, name: "Reports", who: "Staff (sign in)", what: "Downloads the data as a PDF report or Excel-friendly CSV files.",
     steps: ["Set the dates and filters.", "Tick the sections you want.", "Press Download PDF report, or a Download CSV button."] },
-  { id: "admin", to: "/admin", icon: Settings, name: "Admin", who: "Team (sign in)", what: "The control room for reports, readings, limits and team accounts.",
+  { id: "admin", to: "/admin", icon: Settings, name: "Admin", who: "Staff (sign in)", what: "The control room for reports, readings, limits and team accounts.",
     steps: ["Citizen reports: open a report, set its status, write a note.", "Observations: press Verify once a reading has been checked on site.", "Thresholds: enter the correct lux range for each road type, with its source."] },
 ];
 
@@ -31,7 +33,7 @@ export default function Guide() {
   useEffect(() => { if (hash) document.querySelector(hash)?.scrollIntoView(); }, [hash]);
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader title="How to use this site" lead="Each page in three steps. Pick the one you need." />
+      <PageHeader title="How to use this site" lead="Each page in three steps. The first pages are open to everyone; the last four are for staff and appear in a separate Staff bar after signing in." />
       <nav aria-label="Pages" className="mb-8 flex flex-wrap gap-2">
         {PAGES.map((p) => <a key={p.id} href={`#${p.id}`} className="rounded-full border border-line bg-surface px-3 py-1.5 text-sm font-medium hover:border-accent">{p.name}</a>)}
       </nav>

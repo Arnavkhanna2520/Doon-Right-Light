@@ -30,8 +30,8 @@ function HeroArt() {
 
 const FEATURES = [
   { icon: MapPinned, title: "Street-level map", text: "Every surveyed location is classified as over-lit, under-lit, not working or adequate, with the evidence behind it.", to: "/map" },
-  { icon: ClipboardCheck, title: "Ground lighting audit", text: "Upload lux-meter surveys as CSV. The platform validates, cleans and classifies each reading against documented thresholds.", to: "/audit" },
-  { icon: BarChart3, title: "Hotspot analysis", text: "Getis-Ord Gi* statistics show where high or low readings cluster, with data-quality indicators beside every chart.", to: "/analysis" },
+  { icon: ClipboardCheck, title: "Survey upload", text: "Staff upload lux-meter readings as Excel or CSV. The site checks every row, then sorts each reading into too bright, about right, too dim or not working.", to: "/upload" },
+  { icon: BarChart3, title: "Hotspot analysis", text: "Shows where bright lights or dark spots are grouped together, so the survey team knows where to look first.", to: "/analysis" },
   { icon: MessageSquareWarning, title: "Citizen reporting", text: "Residents report glare, light entering homes, dark roads and broken lights. Reports stay unverified until reviewed.", to: "/report" },
   { icon: Lightbulb, title: "Safety-aware recommendations", text: "Shield, re-aim, repair or review. Reductions are never suggested at junctions, crossings, hospitals or bus stops.", to: "/recommendations" },
   { icon: Zap, title: "Energy calculator", text: "Estimate the energy and cost effect of a wattage change from your own assumptions.", to: "/calculator" },
@@ -52,7 +52,7 @@ export default function Home() {
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {[{ who: "I live in Dehradun", text: "Tell us about a light that glares, shines into your home, or a road that is dark.", to: "/report", cta: "Report a lighting issue" },
               { who: "I work for the city", text: "See which areas need attention first and what to do at each place.", to: "/recommendations", cta: "See the priority list" },
-              { who: "I am measuring streets", text: "Upload your lux-meter readings and let the site check and map them.", to: "/audit", cta: "Upload a survey" }].map((c) => (
+              { who: "I am measuring streets", text: "Upload your lux-meter readings and let the site check and map them.", to: "/upload", cta: "Upload a survey" }].map((c) => (
               <Link key={c.who} to={c.to} className="group flex flex-col rounded-3xl border border-line bg-surface p-7 transition hover:-translate-y-0.5 hover:border-accent">
                 <span className="display text-2xl font-semibold">{c.who}</span>
                 <span className="mt-2 flex-1 text-muted">{c.text}</span>

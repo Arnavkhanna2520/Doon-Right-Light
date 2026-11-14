@@ -1,11 +1,11 @@
-"""Ground-audit CSV upload: validate -> preview -> download cleaned -> import."""
+"""Survey upload (CSV or Excel): validate -> preview -> download cleaned -> import; list uploaded files."""
 from __future__ import annotations
 
 import json
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .. import models as m
@@ -17,8 +17,9 @@ from ..services import classification, csv_validation, recommendations
 router = APIRouter(prefix="/api/datasets", tags=["datasets"])
 
 
-def dataset_dict(d: m.Dataset, with_report: bool = False) -> dict:
+def dataset_dict(d: m.Dataset, with_report: bool = False, uploader: str | None = None, records: int | None = None) -> dict:
     out = {
+        "uploaded_by": uploader, "records": records,
         "id": d.id, "filename": d.filename, "status": d.status, "data_origin": d.data_origin,
         "source_note": d.source_note, "collected_on": d.collected_on, "row_count": d.row_count,
         "valid_count": d.valid_count, "error_count": d.error_count, "warning_count": d.warning_count,
@@ -35,10 +36,20 @@ def template():
                     headers={"Content-Disposition": 'attachment; filename="lighting-audit-template.csv"'})
 
 
+@router.get("/template.xlsx")
+def template_excel():
+    return Response(csv_validation.template_xlsx(),
+                    media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    headers={"Content-Disposition": 'attachment; filename="lighting-audit-template.xlsx"'})
+
+
 @router.get("")
 def list_datasets(db: Session = Depends(get_db), _: m.User = Depends(require_staff)):
-    rows = db.scalars(select(m.Dataset).order_by(m.Dataset.created_at.desc()).limit(100))
-    return {"items": [dataset_dict(d) for d in rows]}
+    rows = list(db.scalars(select(m.Dataset).order_by(m.Dataset.created_at.desc()).limit(100)))
+    emails = dict(db.execute(select(m.User.id, m.User.email)).all())
+    counts = dict(db.execute(select(m.Observation.dataset_id, func.count(m.Observation.id))
+                             .where(m.Observation.dataset_id.is_not(None)).group_by(m.Observation.dataset_id)).all())
+    return {"items": [dataset_dict(d, uploader=emails.get(d.uploaded_by), records=counts.get(d.id, 0)) for d in rows]}
 
 
 @router.post("/validate", status_code=201)
@@ -53,13 +64,19 @@ def validate(
 ):
     s = get_settings()
     name = (file.filename or "upload.csv")[:255]
-    if not name.lower().endswith(".csv"):
-        raise HTTPException(415, "Only .csv files are accepted.")
+    is_excel = name.lower().endswith(".xlsx")
+    if not (is_excel or name.lower().endswith(".csv")):
+        raise HTTPException(415, "Only .csv or .xlsx (Excel) files are accepted.")
     if data_origin not in ("ground_measured", "imported"):
         raise HTTPException(422, "Data origin must be 'ground_measured' or 'imported'.")
     raw = file.file.read(s.max_csv_mb * 1024 * 1024 + 1)
     if len(raw) > s.max_csv_mb * 1024 * 1024:
         raise HTTPException(413, f"File is larger than {s.max_csv_mb} MB.")
+    if is_excel:
+        try:
+            raw = csv_validation.xlsx_to_csv(raw)
+        except ValueError as e:
+            raise HTTPException(422, str(e)) from e
     report = csv_validation.validate_csv(raw, s.max_csv_rows)
     cleaned = report.pop("cleaned_rows")
     sm = report["summary"]

@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
 import { Spinner } from "./components/ui";
 import { AppProvider } from "./lib/hooks";
@@ -9,7 +9,8 @@ import Home from "./pages/Home";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const MapPage = lazy(() => import("./pages/MapPage"));
 const Analysis = lazy(() => import("./pages/Analysis"));
-const Audit = lazy(() => import("./pages/Audit"));
+const Upload = lazy(() => import("./pages/Upload"));
+const Records = lazy(() => import("./pages/Records"));
 const Report = lazy(() => import("./pages/Report"));
 const Recommendations = lazy(() => import("./pages/Recommendations"));
 const Calculator = lazy(() => import("./pages/Calculator"));
@@ -32,7 +33,9 @@ export default function App() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="map" element={<MapPage />} />
               <Route path="analysis" element={<Analysis />} />
-              <Route path="audit" element={<Audit />} />
+              <Route path="upload" element={<Upload />} />
+              <Route path="records" element={<Records />} />
+              <Route path="audit" element={<Navigate to="/upload" replace />} />
               <Route path="report" element={<Report />} />
               <Route path="recommendations" element={<Recommendations />} />
               <Route path="calculator" element={<Calculator />} />

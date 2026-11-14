@@ -90,6 +90,54 @@ def template_csv() -> str:
     return buf.getvalue()
 
 
+def xlsx_to_csv(raw: bytes) -> bytes:
+    """Turn the first sheet of an Excel workbook into CSV bytes, so it goes through the same checks as a CSV."""
+    from openpyxl import load_workbook
+
+    try:
+        wb = load_workbook(io.BytesIO(raw), read_only=True, data_only=True)
+    except Exception as e:  # not a valid .xlsx file
+        raise ValueError("This file could not be read as an Excel workbook (.xlsx).") from e
+    ws = wb.worksheets[0]
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    for row in ws.iter_rows(values_only=True):
+        cells = []
+        for v in row:
+            if v is None:
+                cells.append("")
+            elif isinstance(v, datetime):
+                cells.append(v.strftime("%Y-%m-%d %H:%M"))
+            elif isinstance(v, bool):
+                cells.append("yes" if v else "no")
+            elif isinstance(v, float) and v.is_integer():
+                cells.append(str(int(v)))
+            else:
+                cells.append(str(v))
+        if any(c.strip() for c in cells):
+            w.writerow(cells)
+    wb.close()
+    return buf.getvalue().encode("utf-8")
+
+
+def template_xlsx() -> bytes:
+    from openpyxl import Workbook
+    from openpyxl.styles import Font
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Survey"
+    for row in csv.reader(io.StringIO(template_csv())):
+        ws.append(row)
+    for c in ws[1]:
+        c.font = Font(bold=True)
+    for col in ws.columns:
+        ws.column_dimensions[col[0].column_letter].width = max(12, len(str(col[0].value)) + 2)
+    out = io.BytesIO()
+    wb.save(out)
+    return out.getvalue()
+
+
 def validate_csv(raw: bytes, max_rows: int = 20000, now: datetime | None = None) -> dict:
     """Validate raw CSV bytes. Returns a report dict with `cleaned_rows`."""
     now = now or datetime.now()

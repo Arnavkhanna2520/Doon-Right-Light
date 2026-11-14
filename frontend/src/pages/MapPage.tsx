@@ -46,7 +46,7 @@ export default function MapPage() {
           <p className="mt-2 text-xs text-muted" aria-live="polite">{loading ? "Loading locations…" : `${items.length} location${items.length === 1 ? "" : "s"} shown.`} Use the layers button (top right of the map) to switch markers, the lux heatmap and citizen reports on or off.</p>
         </div>
         <aside className="space-y-3">
-          <Note>Markers come from ground surveys. This map does not show satellite data, and a missing marker means "not surveyed", not "no problem".</Note>
+          <Note>Each marker is a place checked on the ground. A street with no marker has not been surveyed yet; it does not mean there is no problem.</Note>
           <div className="rounded-xl border border-line bg-surface">
             <h2 className="border-b border-line px-4 py-2.5 text-sm font-semibold">Locations {filters.q && `matching “${filters.q}”`}</h2>
             {items.length === 0 && !loading ? <p className="p-4 text-sm text-muted">No locations match. Try resetting the filters.</p> : (

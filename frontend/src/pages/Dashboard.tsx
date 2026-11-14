@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Filters } from "../components/Filters";
-import { Card, Empty, ErrorBox, Field, Input, Note, PageHeader, Spinner } from "../components/ui";
+import { Card, Empty, ErrorBox, Note, PageHeader, Spinner } from "../components/ui";
 import { EMPTY_FILTERS, type FilterState } from "../lib/api";
-import { CLASS_KEYS, CLASS_META, PRIORITY_COLOR, REPORT_CATEGORY, REPORT_STATUS, fmtNum, human } from "../lib/format";
+import { CLASS_KEYS, CLASS_META, REPORT_STATUS, fmtNum } from "../lib/format";
 import { useApi, usePageMeta } from "../lib/hooks";
 
 /** Numbers roll to their new value when the data or filters change, so a change is noticed. */
@@ -65,114 +65,84 @@ function LightBalance({ k }: { k: any }) {
 }
 
 const H = 260;
+const PROBLEMS = ["potential_excessive", "insufficient", "non_functional"] as const;
 
 export default function Dashboard() {
-  usePageMeta("Dashboard", "Counts, zone comparisons, trends and priority levels for surveyed street lighting in Dehradun.");
+  usePageMeta("Dashboard", "How street lighting in Dehradun is doing: places checked, too bright, too dim and not working, by area.");
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
-  const [hours, setHours] = useState(11);
   const { data, error, loading, reload } = useApi("/stats", { ...filters });
   const k = data?.kpis;
   const cls = (data?.by_classification ?? []).map((d: any) => ({ ...d, name: CLASS_META[d.key].short }));
-  const energy = (data?.wattage_by_classification ?? []).map((d: any) => ({
-    name: CLASS_META[d.key]?.short ?? d.key, key: d.key, kwh: Math.round((d.total_watts / 1000) * hours * 10) / 10, fixtures: d.fixtures,
-  }));
+  // Areas ranked by how many places have a problem (too bright, too dim or not working).
+  const zones = (data?.by_zone ?? []).map((z: any) => ({
+    ...z, problems: PROBLEMS.reduce((n, c) => n + (z[c] ?? 0), 0), total: CLASS_KEYS.reduce((n, c) => n + (z[c] ?? 0), 0),
+  })).sort((a: any, b: any) => b.problems - a.problems || a.zone.localeCompare(b.zone));
+  const worst = zones.slice(0, 10);
+  const reports = (data?.reports?.by_status ?? []).map((d: any) => ({ ...d, name: REPORT_STATUS[d.key] ?? d.key }));
   return (
     <>
-      <PageHeader help="dashboard" title="Monitoring dashboard" lead="Every figure is counted from the latest observation at each surveyed location, within the filters you choose." />
+      <PageHeader help="dashboard" title="Dashboard" lead="How street lighting is doing across the places checked. Use the filters to look at one area, one kind of problem or a date range." />
       <Filters value={filters} onChange={setFilters} />
       <div className="mt-6 space-y-6">
         {error && <ErrorBox message={error} retry={reload} />}
         {loading && !data && <Spinner />}
         {data && k.monitored_locations === 0 && (
-          <Empty title="No observations match these filters">Reset the filters, or <Link className="text-info underline" to="/audit">import a ground survey</Link>.</Empty>
+          <Empty title="No readings match these filters">Reset the filters, or <Link className="text-info underline" to="/upload">upload a survey</Link>.</Empty>
         )}
         {data && (
           <>
-            {k.demo_locations > 0 && <Note tone="warn"><strong>{fmtNum(k.demo_locations)} of {fmtNum(k.monitored_locations)} locations below are demo data.</strong> The areas are real, the numbers are invented examples. Use the Data source filter to hide them.</Note>}
+            {k.demo_locations > 0 && <Note tone="warn"><strong>{fmtNum(k.demo_locations)} of {fmtNum(k.monitored_locations)} places below are demo data.</strong> The areas are real, the numbers are invented examples. Use the Data source filter to hide them.</Note>}
             {k.monitored_locations > 0 && <LightBalance k={k} />}
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
-              <Kpi label="Monitored locations" value={k.monitored_locations} />
-              <Kpi label="Potential hotspots" value={k.potential_excessive + k.insufficient + k.non_functional} hint="Locations classified as excessive, insufficient or non-functional" />
-              <Kpi label="Excessively illuminated" value={k.potential_excessive} color={CLASS_META.potential_excessive.color} />
-              <Kpi label="Insufficiently illuminated" value={k.insufficient} color={CLASS_META.insufficient.color} />
-              <Kpi label="Faulty streetlights" value={k.non_functional} color={CLASS_META.non_functional.color} hint={`Recorded in surveys. Citizens have separately reported ${data.reports.faulty_streetlight_reports} broken lights.`} />
-              <Kpi label="Citizen reports" value={data.reports.total} hint={data.reports.demo ? `${data.reports.demo} are demo reports` : "All statuses"} />
-              <Kpi label="High-priority locations" value={k.high_priority} color={PRIORITY_COLOR.high} />
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <Kpi label="Places checked" value={k.monitored_locations} />
+              <Kpi label="Too bright" value={k.potential_excessive} color={CLASS_META.potential_excessive.color} hint="Wastes energy and adds to light pollution" />
+              <Kpi label="Too dim" value={k.insufficient} color={CLASS_META.insufficient.color} hint="Below the lux range for the road type" />
+              <Kpi label="Not working" value={k.non_functional} color={CLASS_META.non_functional.color} hint={`Recorded in surveys. Residents have separately reported ${data.reports.faulty_streetlight_reports} broken lights.`} />
             </div>
 
             <div className="grid gap-6 lg:grid-cols-2">
-              <Card title="Lighting condition distribution" hint="Locations by classification">
+              <Card title="Condition of all places checked" hint="How many places fall in each group">
                 <ResponsiveContainer width="100%" height={H}>
                   <BarChart data={cls} margin={{ left: -16 }}>
                     <CartesianGrid vertical={false} /><XAxis dataKey="name" tickLine={false} /><YAxis allowDecimals={false} tickLine={false} axisLine={false} />
                     <Tooltip cursor={{ fill: "var(--raised)" }} />
-                    <Bar dataKey="count" name="Locations" radius={[4, 4, 0, 0]}>{cls.map((d: any) => <Cell key={d.key} fill={CLASS_META[d.key].color} />)}</Bar>
+                    <Bar dataKey="count" name="Places" radius={[4, 4, 0, 0]}>{cls.map((d: any) => <Cell key={d.key} fill={CLASS_META[d.key].color} />)}</Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </Card>
-              <Card title="Area-wise comparison" hint="Lighting condition in each area">
-                {data.by_zone.length === 0 ? <Empty title="No areas recorded" /> : (
-                  <ResponsiveContainer width="100%" height={H}>
-                    <BarChart data={data.by_zone} margin={{ left: -16 }}>
-                      <CartesianGrid vertical={false} /><XAxis dataKey="zone" tickLine={false} /><YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+              <Card title="Areas that need the most attention" hint="Places too bright, too dim or not working, top 10 areas">
+                {worst.length === 0 ? <Empty title="No areas recorded" /> : (
+                  <ResponsiveContainer width="100%" height={Math.max(H, worst.length * 26 + 40)}>
+                    <BarChart data={worst} layout="vertical" margin={{ left: 8, right: 16 }}>
+                      <CartesianGrid horizontal={false} /><XAxis type="number" allowDecimals={false} tickLine={false} axisLine={false} />
+                      <YAxis type="category" dataKey="zone" width={130} tickLine={false} interval={0} />
+                      <Tooltip cursor={{ fill: "var(--raised)" }} />
+                      {PROBLEMS.map((c) => <Bar key={c} dataKey={c} name={CLASS_META[c].short} stackId="p" fill={CLASS_META[c].color} />)}
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </Card>
+              <Card className="lg:col-span-2" title="Condition in every area" hint="Each bar is one area, split by condition; areas with the most problems first">
+                {zones.length === 0 ? <Empty title="No areas recorded" /> : (
+                  <ResponsiveContainer width="100%" height={zones.length * 24 + 70}>
+                    <BarChart data={zones} layout="vertical" margin={{ left: 8, right: 16 }}>
+                      <CartesianGrid horizontal={false} /><XAxis type="number" allowDecimals={false} tickLine={false} axisLine={false} />
+                      <YAxis type="category" dataKey="zone" width={150} tickLine={false} interval={0} />
                       <Tooltip cursor={{ fill: "var(--raised)" }} /><Legend />
                       {CLASS_KEYS.map((c) => <Bar key={c} dataKey={c} name={CLASS_META[c].short} stackId="a" fill={CLASS_META[c].color} />)}
                     </BarChart>
                   </ResponsiveContainer>
                 )}
               </Card>
-              <Card title="Monthly trend" hint="Locations by the month of their latest measurement, and average lux">
-                <ResponsiveContainer width="100%" height={H}>
-                  <LineChart data={data.monthly} margin={{ left: -16 }}>
-                    <CartesianGrid vertical={false} /><XAxis dataKey="month" tickLine={false} /><YAxis yAxisId="l" allowDecimals={false} tickLine={false} axisLine={false} /><YAxis yAxisId="r" orientation="right" tickLine={false} axisLine={false} />
-                    <Tooltip /><Legend />
-                    <Line yAxisId="l" type="monotone" dataKey="total" name="Locations measured" stroke="var(--info)" strokeWidth={2} dot={{ r: 3 }} />
-                    <Line yAxisId="r" type="monotone" dataKey="avg_lux" name="Average lux" stroke="var(--c-excess)" strokeWidth={2} dot={{ r: 3 }} connectNulls />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Card>
-              <Card title="Priority-level distribution" hint="Highest open recommendation per location">
-                <ResponsiveContainer width="100%" height={H}>
-                  <PieChart>
-                    <Pie data={data.by_priority.filter((d: any) => d.count)} dataKey="count" nameKey="key" innerRadius={55} outerRadius={90} paddingAngle={2}
-                      label={(p: any) => p.count}>
-                      {data.by_priority.filter((d: any) => d.count).map((d: any) => <Cell key={d.key} fill={PRIORITY_COLOR[d.key]} stroke="var(--surface)" />)}
-                    </Pie>
-                    <Tooltip formatter={(v: any, n: any) => [v, human(String(n))]} />
-                    <Legend formatter={(v: any) => (v === "none" ? "No action needed" : `${human(String(v))} priority`)} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Card>
-              <Card title="Energy consumption estimate" hint="Recorded fixture wattage × assumed hours per night, by classification"
-                actions={<div className="w-28"><Field label="Hours / night"><Input type="number" min={1} max={24} step={0.5} value={hours} onChange={(e) => setHours(Math.min(24, Math.max(1, Number(e.target.value) || 1)))} /></Field></div>}>
-                {energy.length === 0 ? <Empty title="No fixture wattage recorded" /> : (
-                  <>
-                    <ResponsiveContainer width="100%" height={H - 40}>
-                      <BarChart data={energy} margin={{ left: -8 }}>
-                        <CartesianGrid vertical={false} /><XAxis dataKey="name" tickLine={false} /><YAxis tickLine={false} axisLine={false} unit=" kWh" width={70} />
-                        <Tooltip cursor={{ fill: "var(--raised)" }} formatter={(v: any, _n: any, p: any) => [`${v} kWh per night (${p.payload.fixtures} fixtures)`, "Estimate"]} />
-                        <Bar dataKey="kwh" radius={[4, 4, 0, 0]}>{energy.map((d: any) => <Cell key={d.key} fill={CLASS_META[d.key]?.color} />)}</Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                    <p className="mt-2 text-xs text-muted">Estimate only: one fixture per surveyed location, nameplate wattage, your assumed hours. It is not metered consumption and must not be scaled to the whole city.</p>
-                  </>
-                )}
-              </Card>
-              <Card title="Citizen reports" hint="By status and category. Reports are unverified until reviewed.">
-                {data.reports.total === 0 ? <Empty title="No citizen reports yet"><Link className="text-info underline" to="/report">Submit the first one</Link>.</Empty> : (
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {[["by_status", REPORT_STATUS], ["by_category", REPORT_CATEGORY]].map(([key, labels]: any) => (
-                      <ul key={key} className="space-y-1.5 text-sm">
-                        {data.reports[key].map((d: any) => (
-                          <li key={d.key} className="flex items-center gap-2">
-                            <span className="flex-1 truncate text-muted">{labels[d.key]}</span>
-                            <span className="h-1.5 w-20 overflow-hidden rounded bg-raised"><span className="block h-full bg-info" style={{ width: `${(d.count / data.reports.total) * 100}%` }} /></span>
-                            <span className="tabular w-6 text-right font-medium">{d.count}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ))}
-                  </div>
+              <Card className="lg:col-span-2" title="Residents' reports" hint={`${fmtNum(data.reports.total)} reports, by where they are in review`}>
+                {data.reports.total === 0 ? <Empty title="No reports from residents yet"><Link className="text-info underline" to="/report">Submit the first one</Link>.</Empty> : (
+                  <ResponsiveContainer width="100%" height={220}>
+                    <BarChart data={reports} margin={{ left: -16 }}>
+                      <CartesianGrid vertical={false} /><XAxis dataKey="name" tickLine={false} /><YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                      <Tooltip cursor={{ fill: "var(--raised)" }} />
+                      <Bar dataKey="count" name="Reports" fill="var(--info)" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 )}
               </Card>
             </div>
