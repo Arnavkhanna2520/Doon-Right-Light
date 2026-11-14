@@ -23,14 +23,13 @@ export function Card({ children, className, title, hint, actions }: {
   );
 }
 
-export function PageHeader({ title, lead, actions, help }: { title: string; lead?: ReactNode; actions?: ReactNode; help?: string }) {
+export function PageHeader({ title, lead, actions }: { title: string; lead?: ReactNode; actions?: ReactNode; help?: string }) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div className="max-w-3xl">
         <h1 className="text-3xl font-semibold sm:text-4xl">{title}</h1>
         <span aria-hidden className="mt-3 block h-1 w-16 rounded-full bg-[linear-gradient(90deg,var(--accent),transparent)]" />
         {lead && <p className="mt-3 text-muted">{lead}</p>}
-        {help && <a href={`/guide#${help}`} className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-info hover:underline"><Info className="size-4" aria-hidden />How to use this page</a>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </div>

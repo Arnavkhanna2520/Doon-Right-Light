@@ -18,11 +18,12 @@ export function Logo({ className = "size-8" }: { className?: string }) {
 // Public pages: anyone can use these without an account.
 const NAV: [string, string][] = [
   ["/dashboard", "Dashboard"], ["/map", "Map"], ["/analysis", "Analysis"],
-  ["/recommendations", "Recommendations"], ["/calculator", "Calculator"], ["/guide", "Guide"],
+  ["/calculator", "Calculator"],
 ];
 // Staff pages: shown only after signing in, in their own bar, filtered by role.
 const STAFF: [string, string, string[]][] = [
   ["/upload", "Upload data", ["auditor"]], ["/records", "Records", ["auditor", "moderator"]],
+  ["/recommendations", "Recommendations", ["auditor", "moderator"]],
   ["/downloads", "Reports", ["auditor", "moderator"]], ["/admin", "Admin", ["auditor", "moderator"]],
 ];
 
@@ -101,7 +102,7 @@ export default function Layout() {
           </div>
           <div><h2 className="font-semibold">Platform</h2><ul className="mt-2 space-y-1.5 text-muted">
             <li><Link className="hover:text-ink" to="/dashboard">Dashboard</Link></li><li><Link className="hover:text-ink" to="/map">Interactive map</Link></li>
-            <li><Link className="hover:text-ink" to="/guide">How to use this site</Link></li><li><Link className="hover:text-ink" to="/report">Report an issue</Link></li></ul></div>
+            <li><Link className="hover:text-ink" to="/report">Report an issue</Link></li></ul></div>
           <div><h2 className="font-semibold">About the data</h2><ul className="mt-2 space-y-1.5 text-muted">
             <li><Link className="hover:text-ink" to="/methodology">Methodology and limitations</Link></li>
             <li><Link className="hover:text-ink" to="/methodology#sources">Data sources</Link></li>

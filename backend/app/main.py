@@ -110,8 +110,7 @@ def api_not_found(rest: str):
     raise HTTPException(404, "Unknown API endpoint.")
 
 
-PUBLIC_PAGES = ["", "dashboard", "map", "analysis", "audit", "report", "recommendations", "calculator",
-                "downloads", "methodology", "privacy"]
+PUBLIC_PAGES = ["", "dashboard", "map", "analysis", "report", "calculator", "methodology", "privacy"]
 
 
 @app.get("/robots.txt", include_in_schema=False)

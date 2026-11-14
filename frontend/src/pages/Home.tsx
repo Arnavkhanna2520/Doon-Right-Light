@@ -1,4 +1,4 @@
-import { ArrowRight, BarChart3, ClipboardCheck, FileDown, Lightbulb, MapPinned, MessageSquareWarning, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import NightSkyHero from "../components/NightSkyHero";
 import { Badge, Card } from "../components/ui";
@@ -28,14 +28,6 @@ function HeroArt() {
   );
 }
 
-const FEATURES = [
-  { icon: MapPinned, title: "Street-level map", text: "Every surveyed location is classified as over-lit, under-lit, not working or adequate, with the evidence behind it.", to: "/map" },
-  { icon: ClipboardCheck, title: "Survey upload", text: "Staff upload lux-meter readings as Excel or CSV. The site checks every row, then sorts each reading into too bright, about right, too dim or not working.", to: "/upload" },
-  { icon: BarChart3, title: "Hotspot analysis", text: "Shows where bright lights or dark spots are grouped together, so the survey team knows where to look first.", to: "/analysis" },
-  { icon: MessageSquareWarning, title: "Citizen reporting", text: "Residents report glare, light entering homes, dark roads and broken lights. Reports stay unverified until reviewed.", to: "/report" },
-  { icon: Lightbulb, title: "Safety-aware recommendations", text: "Shield, re-aim, repair or review. Reductions are never suggested at junctions, crossings, hospitals or bus stops.", to: "/recommendations" },
-  { icon: Zap, title: "Energy calculator", text: "Estimate the energy and cost effect of a wattage change from your own assumptions.", to: "/calculator" },
-];
 
 export default function Home() {
   usePageMeta("Street lighting audit for Dehradun", "Doon Right-Light maps where outdoor lighting in Dehradun is too bright, too dim, badly aimed or not working.");
@@ -47,22 +39,6 @@ export default function Home() {
       <NightSkyHero />
 
       <div className="mx-auto max-w-7xl space-y-20 px-4 py-16">
-        <section aria-labelledby="start">
-          <h2 id="start" className="text-3xl font-semibold sm:text-4xl">Where do you want to start?</h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {[{ who: "I live in Dehradun", text: "Tell us about a light that glares, shines into your home, or a road that is dark.", to: "/report", cta: "Report a lighting issue" },
-              { who: "I work for the city", text: "See which areas need attention first and what to do at each place.", to: "/recommendations", cta: "See the priority list" },
-              { who: "I am measuring streets", text: "Upload your lux-meter readings and let the site check and map them.", to: "/upload", cta: "Upload a survey" }].map((c) => (
-              <Link key={c.who} to={c.to} className="group flex flex-col rounded-3xl border border-line bg-surface p-7 transition hover:-translate-y-0.5 hover:border-accent">
-                <span className="display text-2xl font-semibold">{c.who}</span>
-                <span className="mt-2 flex-1 text-muted">{c.text}</span>
-                <span className="mt-5 self-start rounded-full bg-raised px-4 py-2 text-sm font-semibold group-hover:bg-brand group-hover:text-brand-ink">{c.cta}</span>
-              </Link>
-            ))}
-          </div>
-          <p className="mt-4 text-sm text-muted">New here? The <Link to="/guide" className="font-medium text-info underline">short guide</Link> explains every page in three steps.</p>
-        </section>
-
         <section className="grid items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
           <div>
             <h2 className="text-3xl font-semibold sm:text-4xl">What is light pollution?</h2>
@@ -85,34 +61,6 @@ export default function Home() {
           </div>
         </section>
 
-        <section aria-labelledby="cap">
-          <h2 id="cap" className="text-3xl font-semibold sm:text-4xl">What the platform does</h2>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((f) => (
-              <Link key={f.title} to={f.to} className="group rounded-2xl border border-line bg-surface p-6 transition hover:-translate-y-0.5 hover:border-accent">
-                <f.icon className="size-6 text-accent" aria-hidden />
-                <h3 className="mt-3 font-semibold">{f.title}</h3>
-                <p className="mt-1 text-sm text-muted">{f.text}</p>
-                              </Link>
-            ))}
-          </div>
-        </section>
-
-        <section aria-labelledby="how">
-          <h2 id="how" className="text-3xl font-semibold sm:text-4xl">How it works</h2>
-          <ol className="mt-6 grid gap-4 md:grid-cols-4">
-            {[["Measure", "Survey teams record lux, fixture condition, shielding and activity at fixed points along a road."],
-              ["Validate", "Uploads are checked for missing values, duplicates, wrong types and inconsistent entries before import."],
-              ["Classify", "Each reading is compared with the range configured for its road type. No range, no guess: it is marked for expert assessment."],
-              ["Act", "Sites are ranked by severity, exposure and confidence, with a suggested fix and the evidence for it."]].map(([t, d], i) => (
-              <li key={t} className="rounded-xl border border-line bg-surface p-5">
-                <span className="display tabular text-4xl font-semibold text-accent/70">{i + 1}</span>
-                <h3 className="mt-1 font-semibold">{t}</h3><p className="mt-1 text-sm text-muted">{d}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
         <section aria-labelledby="preview" className="grid items-start gap-8 lg:grid-cols-[1fr_1.2fr]">
           <div>
             <h2 id="preview" className="text-3xl font-semibold sm:text-4xl">Monitoring dashboard</h2>
@@ -132,15 +80,6 @@ export default function Home() {
               <div className="rounded-lg bg-raised p-3"><p className="text-xs text-muted">Locations</p><p className="display tabular mt-1 text-3xl font-semibold">{k ? fmtNum(k.monitored_locations) : "–"}</p></div>
             </div>
           </Card>
-        </section>
-
-        <section aria-labelledby="benefit" className="grid gap-4 md:grid-cols-3">
-          <h2 id="benefit" className="text-3xl font-semibold sm:text-4xl md:col-span-3">Why it is worth doing</h2>
-          {[[Zap, "Lower energy bills", "Right-sizing wattage and shielding fixtures cuts the electricity spent on light nobody uses."],
-            [ShieldCheck, "Safer streets", "Dark stretches and broken lights are flagged with the same priority as over-lighting."],
-            [FileDown, "Evidence for decisions", "Every flag carries its measurement, date, source and verification status, exportable as CSV or PDF."]].map(([Icon, t, d]: any) => (
-            <div key={t} className="rounded-xl border border-line bg-surface p-5"><Icon className="size-6 text-ok" aria-hidden /><h3 className="mt-3 font-semibold">{t}</h3><p className="mt-1 text-sm text-muted">{d}</p></div>
-          ))}
         </section>
 
         <section className="dark rounded-3xl bg-[linear-gradient(135deg,#0b0f29,#1a2258)] p-8 text-ink sm:p-12">

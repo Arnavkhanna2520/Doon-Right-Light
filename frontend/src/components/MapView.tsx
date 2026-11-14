@@ -102,12 +102,15 @@ function LocationPopup({ f }: { f: Feature }) {
         {o.notes && <Row k="Reported issue / notes">{o.notes}</Row>}
       </dl>
       <p className="mt-2 text-xs text-muted">{o.classification_basis}</p>
-      <div className="mt-2 rounded-md bg-raised p-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted">Recommended action</p>
-        {recs === null ? <p className="text-muted">Loading…</p> : recs.length === 0 ? <p>No action suggested.</p> :
-          <ul className="mt-1 list-disc pl-4">{recs.slice(0, 3).map((r) => <li key={r.id}>{r.title}</li>)}</ul>}
-      </div>
-      <Link to={`/recommendations?location=${f.id}`} className="mt-2 inline-block text-info underline">See evidence</Link>
+      {recs !== null && recs.length > 0 && (
+        <>
+          <div className="mt-2 rounded-md bg-raised p-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">Recommended action (staff)</p>
+            <ul className="mt-1 list-disc pl-4">{recs.slice(0, 3).map((r) => <li key={r.id}>{r.title}</li>)}</ul>
+          </div>
+          <Link to={`/recommendations?location=${f.id}`} className="mt-2 inline-block text-info underline">See evidence</Link>
+        </>
+      )}
     </div>
   );
 }

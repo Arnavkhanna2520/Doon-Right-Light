@@ -111,7 +111,7 @@ def test_csv_upload_validate_import_flow(admin, auditor, client):
     assert all(f["latest"]["data_origin"] == "ground_measured" for f in feats.values())
 
     # unverified data -> only 'verify' or fault-check recommendations
-    recs = client.get("/api/recommendations?page_size=100").json()["items"]
+    recs = auditor.get("/api/recommendations?page_size=100").json()["items"]
     assert {r["action"] for r in recs} <= {"verify_measurement", "repair_fixture"}
 
     # verify B (excess) and the junction; add a junction threshold
@@ -120,7 +120,7 @@ def test_csv_upload_validate_import_flow(admin, auditor, client):
         assert auditor.patch(f"/api/admin/observations/{obs[name]['id']}",
                              json={"verification_status": "verified"}).status_code == 200
     set_threshold(admin, "junction", 20, 50)
-    recs = client.get("/api/recommendations?page_size=100").json()["items"]
+    recs = auditor.get("/api/recommendations?page_size=100").json()["items"]
     by_loc = {}
     for r in recs:
         by_loc.setdefault(r["location"]["name"], set()).add(r["action"])
@@ -168,7 +168,7 @@ def test_demo_data_is_labelled_and_cannot_be_verified(admin, auditor, client, db
     assert client.get("/api/locations?classification=verified_issue").json()["count"] == 0
     assert client.get("/api/locations?include_demo=false").json()["count"] == 0
     assert all(r["evidence_level"] == "demo"
-               for r in client.get("/api/recommendations?page_size=100").json()["items"])
+               for r in admin.get("/api/recommendations?page_size=100").json()["items"])
     oid = feats[0]["latest"]["id"]
     assert auditor.patch(f"/api/admin/observations/{oid}", json={"verification_status": "verified"}).status_code == 409
     hot = client.get("/api/analysis/hotspots?radius_m=1500").json()
@@ -343,3 +343,8 @@ def test_excel_upload_and_records_view(admin, auditor):
     bad = auditor.post("/api/datasets/validate", files={"file": ("broken.xlsx", b"not a workbook", "application/octet-stream")})
     assert bad.status_code == 422 and "Excel" in bad.json()["detail"]
     assert auditor.post("/api/datasets/validate", files={"file": ("x.txt", b"a,b", "text/plain")}).status_code == 415
+
+
+def test_recommendations_are_staff_only(client, auditor):
+    assert client.get("/api/recommendations").status_code == 401
+    assert auditor.get("/api/recommendations").status_code == 200

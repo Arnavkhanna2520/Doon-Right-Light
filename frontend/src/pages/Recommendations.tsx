@@ -1,10 +1,11 @@
 import { ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { SignInPrompt } from "../components/SignInPrompt";
 import { Badge, Card, Empty, ErrorBox, Field, Note, PageHeader, Pagination, Select, Spinner } from "../components/ui";
 import type { Rec } from "../lib/api";
 import { PRIORITY_COLOR, human } from "../lib/format";
-import { useApi, useApp, usePageMeta } from "../lib/hooks";
+import { can, useApi, useApp, usePageMeta } from "../lib/hooks";
 
 function RecCard({ r }: { r: Rec }) {
   return (
@@ -31,18 +32,21 @@ function RecCard({ r }: { r: Rec }) {
 
 export default function Recommendations() {
   usePageMeta("Recommendations", "Evidence-based, safety-aware suggestions for improving street lighting at surveyed locations in Dehradun.");
-  const { meta } = useApp();
+  const { meta, user, authReady } = useApp();
+  const staff = can(user, "auditor", "moderator");
   const [sp] = useSearchParams();
   const locId = sp.get("location");
   const [level, setLevel] = useState("");
   const [action, setAction] = useState("");
   const [zone, setZone] = useState("");
   const [page, setPage] = useState(1);
-  const list = useApi(locId ? null : "/recommendations", { level, action, zone, page, page_size: 10 });
-  const one = useApi(locId ? `/locations/${locId}` : null);
+  const list = useApi(locId || !staff ? null : "/recommendations", { level, action, zone, page, page_size: 10 });
+  const one = useApi(locId && staff ? `/locations/${locId}` : null);
   const items: Rec[] = locId ? (one.data?.recommendations ?? []).map((r: Rec) => ({ ...r, location: one.data })) : list.data?.items ?? [];
   const state = locId ? one : list;
   const reset = (fn: (v: string) => void) => (e: { target: { value: string } }) => { fn(e.target.value); setPage(1); };
+  if (!authReady) return null;
+  if (!staff) return <><PageHeader title="Recommendations" /><SignInPrompt what="Recommendations are for staff. Sign in to see the suggested actions." roles="staff" /></>;
   return (
     <>
       <PageHeader help="recommendations" title="Recommendations" lead="Suggested actions for surveyed locations, ranked by priority. Each one shows the measurement and reasoning behind it. They are options for a qualified engineer to assess, not instructions." />

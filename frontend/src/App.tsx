@@ -19,7 +19,6 @@ const Admin = lazy(() => import("./pages/Admin"));
 const Login = lazy(() => import("./pages/Login"));
 const Methodology = lazy(() => import("./pages/Methodology"));
 const Privacy = lazy(() => import("./pages/Privacy"));
-const Guide = lazy(() => import("./pages/Guide"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 export default function App() {
@@ -44,7 +43,7 @@ export default function App() {
               <Route path="login" element={<Login />} />
               <Route path="methodology" element={<Methodology />} />
               <Route path="privacy" element={<Privacy />} />
-              <Route path="guide" element={<Guide />} />
+              <Route path="guide" element={<Navigate to="/" replace />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

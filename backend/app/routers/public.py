@@ -1,4 +1,4 @@
-"""Public, read-only API: metadata, map features, statistics, analysis, recommendations, calculator."""
+"""Public, read-only API: metadata, map features, statistics, analysis, calculator. Recommendations are staff-only."""
 from __future__ import annotations
 
 import json
@@ -9,6 +9,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .. import models as m
+from ..security import get_optional_user, require_staff
 from ..config import STUDY_AREA
 from ..db import get_db
 from ..integrations import black_marble
@@ -54,7 +55,7 @@ def list_locations(f: Filters = Depends(), db: Session = Depends(get_db)):
 
 
 @router.get("/locations/{location_id}")
-def location_detail(location_id: int, db: Session = Depends(get_db)):
+def location_detail(location_id: int, db: Session = Depends(get_db), user: m.User | None = Depends(get_optional_user)):
     loc = db.get(m.Location, location_id)
     if not loc:
         raise HTTPException(404, "Location not found.")
@@ -63,7 +64,8 @@ def location_detail(location_id: int, db: Session = Depends(get_db)):
         "road_type": loc.road_type, "safety_critical": loc.safety_critical, "safety_context": loc.safety_context,
         "data_origin": loc.data_origin,
         "observations": [obs_dict(o) for o in loc.observations[:50]],
-        "recommendations": [rec_dict(r) for r in sorted(loc.recommendations, key=lambda r: -r.priority_score)],
+        # Recommendations are for staff only; the public sees the measurement, not the action list.
+        "recommendations": [rec_dict(r) for r in sorted(loc.recommendations, key=lambda r: -r.priority_score)] if user else [],
     }
 
 
@@ -173,7 +175,7 @@ def rec_dict(r: m.Recommendation) -> dict:
 def list_recommendations(
     level: str | None = None, action: str | None = None, zone: str | None = None,
     evidence_level: str | None = None, page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db), _: m.User = Depends(require_staff),
 ):
     stmt = select(m.Recommendation, m.Location).join(m.Location)
     if level:

@@ -13,9 +13,8 @@ The aim is not to remove streetlights. It is to light streets properly and stop 
 | Area | What it does |
 | --- | --- |
 | Home page | Interactive night-sky hero (drag to shield the streetlights and watch the stars return), then the problem, the method and how to take part |
-| Guide | A plain-language page explaining every page in three steps, linked from each page header |
 | Themes | Night (default) and light modes with a switch in the navigation bar; the choice is remembered |
-| Public and staff areas | The main menu holds only public pages (Dashboard, Map, Analysis, Recommendations, Calculator, Guide, Report an issue). Staff pages (Upload data, Records, Reports, Admin) appear in a separate Staff bar after signing in, filtered by role |
+| Public and staff areas | The main menu holds only public pages (Dashboard, Map, Analysis, Calculator, Report an issue). Staff pages (Upload data, Records, Recommendations, Reports, Admin) appear in a separate Staff bar after signing in, filtered by role |
 | Dashboard | One-sentence summary, four cards (places checked, too bright, too dim, not working) and four charts: overall condition, the 10 areas needing most attention, condition in every area, residents' reports. All driven by shared filters |
 | Interactive map | OpenStreetMap + Leaflet. Markers are drawn as points of light whose glow reflects the condition; a dotted outer ring marks demo data. Night, light and street basemaps. Popups show measurement, fixture, verification and suggested action. Layer control, lux heatmap, legend, search, filters |
 | Analysis | Clusters of bright lights and of dark spots, grouped by area (Getis-Ord Gi\* within 500 m, explained on the Methodology page), and a chart of how bright the places are |
@@ -23,7 +22,7 @@ The aim is not to remove streetlights. It is to light streets properly and stop 
 | Records (staff) | Every uploaded file (when, by whom, rows saved) and a searchable list of all readings, filterable by file |
 | Citizen reporting | Public form with optional map pin and photo, report ID, status tracking, duplicate linking, spam protection |
 | Admin panel | Report moderation, observation verification, locations, thresholds, staff accounts, activity log, demo-data controls |
-| Recommendations | Rule-based, safety-aware suggestions with the evidence for each |
+| Recommendations (staff) | Rule-based, safety-aware suggestions with the evidence for each; visible only to signed-in staff |
 | Energy calculator | Energy and cost estimate from user-entered assumptions, with PDF export |
 | Reports | CSV and PDF exports that state period, sources, method and limitations |
 
