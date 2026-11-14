@@ -18,12 +18,11 @@ export function Logo({ className = "size-8" }: { className?: string }) {
 // Public pages: anyone can use these without an account.
 const NAV: [string, string][] = [
   ["/dashboard", "Dashboard"], ["/map", "Map"], ["/analysis", "Analysis"],
-  ["/calculator", "Calculator"],
 ];
 // Staff pages: shown only after signing in, in their own bar, filtered by role.
 const STAFF: [string, string, string[]][] = [
   ["/upload", "Upload data", ["auditor"]], ["/records", "Records", ["auditor", "moderator"]],
-  ["/recommendations", "Recommendations", ["auditor", "moderator"]],
+  ["/recommendations", "Recommendations", ["auditor", "moderator"]], ["/calculator", "Calculator", ["auditor", "moderator"]],
   ["/downloads", "Reports", ["auditor", "moderator"]], ["/admin", "Admin", ["auditor", "moderator"]],
 ];
 

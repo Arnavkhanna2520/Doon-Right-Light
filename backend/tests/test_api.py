@@ -265,18 +265,19 @@ def test_exports(admin, moderator, client):
     assert "contact" not in rep.text.splitlines()[1]
     pdf = moderator.get("/api/exports/report.pdf")
     assert pdf.status_code == 200 and pdf.content[:5] == b"%PDF-" and len(pdf.content) > 5000
-    e = client.post("/api/energy/estimate.pdf", json={"fixtures": 10, "current_wattage": 120, "proposed_wattage": 90,
+    e = moderator.post("/api/energy/estimate.pdf", json={"fixtures": 10, "current_wattage": 120, "proposed_wattage": 90,
                                                       "hours_per_day": 11, "days": 365, "tariff": 6})
     assert e.status_code == 200 and e.content[:5] == b"%PDF-"
     logs = admin.get("/api/admin/audit-logs").json()
     assert logs["total"] >= 6 and any(a["action"] == "export" for a in logs["items"])
 
 
-def test_energy_endpoint(client):
-    r = client.post("/api/energy/estimate", json={"fixtures": 100, "current_wattage": 120, "proposed_wattage": 90,
+def test_energy_endpoint(client, auditor):
+    assert client.post("/api/energy/estimate", json={}).status_code == 401  # staff only
+    r = auditor.post("/api/energy/estimate", json={"fixtures": 100, "current_wattage": 120, "proposed_wattage": 90,
                                                   "hours_per_day": 11, "days": 365, "tariff": 6.5})
     assert r.json()["saved_kwh"] == 12045.0 and r.json()["percent_reduction"] == 25.0
-    bad = client.post("/api/energy/estimate", json={"fixtures": -1, "current_wattage": 120, "proposed_wattage": 90,
+    bad = auditor.post("/api/energy/estimate", json={"fixtures": -1, "current_wattage": 120, "proposed_wattage": 90,
                                                     "hours_per_day": 11, "days": 365, "tariff": 6.5})
     assert bad.status_code == 422 and isinstance(bad.json()["detail"], str)
 

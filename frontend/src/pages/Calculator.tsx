@@ -3,7 +3,8 @@ import { useMemo, useState } from "react";
 import { Button, Card, ErrorBox, Field, Input, Note, PageHeader } from "../components/ui";
 import { download } from "../lib/api";
 import { fmtNum } from "../lib/format";
-import { usePageMeta } from "../lib/hooks";
+import { SignInPrompt } from "../components/SignInPrompt";
+import { can, useApp, usePageMeta } from "../lib/hooks";
 
 const FIELDS: { key: string; label: string; hint: string; min: number; max: number; step: number }[] = [
   { key: "fixtures", label: "Number of lighting fixtures", hint: "Whole number", min: 1, max: 1000000, step: 1 },
@@ -16,6 +17,7 @@ const FIELDS: { key: string; label: string; hint: string; min: number; max: numb
 
 export default function Calculator() {
   usePageMeta("Energy savings calculator", "Estimate energy and cost savings from changing streetlight wattage, using your own assumptions.");
+  const { user, authReady } = useApp();
   const [v, setV] = useState<Record<string, string>>({ fixtures: "100", current_wattage: "120", proposed_wattage: "90", hours_per_day: "11", days: "365", tariff: "" });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -49,6 +51,8 @@ export default function Calculator() {
   const Row = ({ label, a, b, c, strong }: { label: string; a: string; b: string; c: string; strong?: boolean }) => (
     <tr className={strong ? "font-semibold" : ""}><th scope="row" className="py-2 pr-3 text-left font-medium text-muted">{label}</th><td className="tabular py-2 pr-3 text-right">{a}</td><td className="tabular py-2 pr-3 text-right">{b}</td><td className="tabular py-2 text-right text-ok">{c}</td></tr>
   );
+  if (!authReady) return null;
+  if (!can(user, "auditor", "moderator")) return <><PageHeader title="Energy savings calculator" /><SignInPrompt what="The energy calculator is for staff. Sign in to use it." roles="staff" /></>;
   return (
     <>
       <PageHeader help="calculator" title="Energy savings calculator" lead="Compare current and proposed fixture wattage. Results update as you type and are estimates based only on the numbers you enter." />

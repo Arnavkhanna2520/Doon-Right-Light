@@ -33,7 +33,7 @@ export default function Downloads() {
       {!authReady ? null : !staff ? (
         <div className="space-y-6">
           <SignInPrompt what="Data exports are limited to project staff, because they can contain unverified records and report text." roles="auditors, moderators and administrators" />
-          <Note>Anyone can download an energy estimate as PDF from the <Link className="underline" to="/calculator">energy calculator</Link>, and the survey <a className="underline" href="/api/datasets/template.csv">CSV template</a>.</Note>
+          <Note>Staff can download an energy estimate as PDF from the <Link className="underline" to="/calculator">energy calculator</Link>, and the survey <a className="underline" href="/api/datasets/template.csv">CSV template</a>.</Note>
         </div>
       ) : (
         <div className="space-y-6">

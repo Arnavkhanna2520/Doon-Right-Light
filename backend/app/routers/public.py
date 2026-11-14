@@ -1,4 +1,4 @@
-"""Public, read-only API: metadata, map features, statistics, analysis, calculator. Recommendations are staff-only."""
+"""Public, read-only API: metadata, map features, statistics, analysis. Recommendations and the energy calculator are staff-only."""
 from __future__ import annotations
 
 import json
@@ -203,12 +203,12 @@ def list_recommendations(
 
 # ------------------------------------------------------------------ energy
 @router.post("/energy/estimate", response_model=energy.EnergyResult)
-def energy_estimate(body: energy.EnergyInput):
+def energy_estimate(body: energy.EnergyInput, _: m.User = Depends(require_staff)):
     return energy.estimate(body)
 
 
 @router.post("/energy/estimate.pdf")
-def energy_estimate_pdf(body: energy.EnergyInput):
+def energy_estimate_pdf(body: energy.EnergyInput, _: m.User = Depends(require_staff)):
     data = pdf.energy_pdf(body, energy.estimate(body))
     return Response(data, media_type="application/pdf",
                     headers={"Content-Disposition": 'attachment; filename="energy-estimate.pdf"'})

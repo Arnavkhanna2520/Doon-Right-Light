@@ -8,7 +8,7 @@ export default function Privacy() {
     <div className="mx-auto max-w-3xl space-y-8">
       <PageHeader title="Privacy policy" lead="This policy explains what information the platform handles, why, and the choices you have. It describes how the software works; the team operating a deployment is responsible for following it." />
       <S title="Browsing the site">
-        <p>You can use the map, dashboard, analysis and calculator without an account. The site sets no advertising or analytics cookies and loads no third-party trackers. Your theme choice is stored in your browser only.</p>
+        <p>You can use the map, dashboard and analysis, and report an issue, without an account. The site sets no advertising or analytics cookies and loads no third-party trackers. Your theme choice is stored in your browser only.</p>
         <p>Map tiles are fetched from OpenStreetMap's servers, which therefore see your IP address and the area you view, as with any web map.</p>
       </S>
       <S title="When you submit a report">
